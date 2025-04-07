@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Page Classifier w/ History</title>
+    <title>Web Page Classifier & History</title>
     <style>
         /* Basic Reset & Font */
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -11,27 +11,55 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             line-height: 1.6; background-color: #f0f2f5; color: #333;
-            display: flex; justify-content: center; align-items: flex-start;
             padding: 20px;
-            flex-wrap: wrap; /* Allow wrapping if needed */
-            gap: 20px; /* Space between main container and history */
         }
-        .container, .history-container {
-            background-color: #ffffff; padding: 30px; border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); width: 100%;
+        .main-wrapper { /* Added wrapper for better structure */
+            background-color: #ffffff; padding: 0; border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); width: 100%; max-width: 900px;
+             margin: 0 auto; /* Center the wrapper */
+             overflow: hidden; /* Contain children */
         }
-        .container {
-             max-width: 700px; /* Main content area */
-             flex-basis: 700px; /* Suggest width */
-             flex-grow: 1; /* Allow growing */
-         }
-        .history-container {
-            max-width: 400px; /* History area */
-            flex-basis: 300px; /* Suggest width */
-            flex-grow: 1; /* Allow growing */
-             align-self: flex-start; /* Align history to top */
+
+        /* Tab Styles */
+        .tab-container {
+            display: flex;
+            background-color: #e9ecef;
+            border-bottom: 1px solid #dee2e6;
         }
-        h1, h2 { color: #1a73e8; margin-bottom: 20px; font-weight: 500; text-align: center; }
+        .tab-button {
+            padding: 12px 20px;
+            cursor: pointer;
+            border: none;
+            background-color: transparent;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #495057;
+            transition: background-color 0.2s ease, color 0.2s ease;
+            border-bottom: 3px solid transparent; /* Placeholder for active border */
+            margin-bottom: -1px; /* Overlap border */
+        }
+        .tab-button:hover {
+            background-color: #f8f9fa;
+            color: #0056b3;
+        }
+        .tab-button.active {
+            color: #0056b3;
+            background-color: #ffffff; /* Match page background */
+            border-bottom: 3px solid #1a73e8;
+        }
+
+        /* Page Content Styles */
+        .page-content {
+            display: none; /* Hide pages by default */
+            padding: 30px; /* Add padding inside pages */
+        }
+        .page-content.active {
+            display: block; /* Show active page */
+        }
+
+        /* Element Styles (mostly reused) */
+        h1, h2 { color: #1a73e8; margin-bottom: 20px; font-weight: 500; }
+        h1 { text-align: center; font-size: 1.8em; padding-top: 20px;} /* Adjust h1 position */
         h2 { font-size: 1.3em; margin-bottom: 15px; text-align: left; }
 
         .form-group { margin-bottom: 20px; text-align: left; }
@@ -44,13 +72,17 @@
             outline: none; border-color: #1a73e8;
             box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
         }
-        button {
+        button { /* General button style */
             background-color: #1a73e8; color: white; border: none; padding: 12px 25px;
             border-radius: 5px; font-size: 1rem; cursor: pointer;
             transition: background-color 0.3s ease, transform 0.1s ease;
-            display: inline-flex; align-items: center; justify-content: center;
-            min-width: 150px; width: 100%; margin-top: 10px;
+             margin-top: 10px;
         }
+         button#classifyButton { /* Specific button styles if needed */
+             display: inline-flex; align-items: center; justify-content: center;
+             min-width: 150px; width: 100%;
+         }
+
         button:hover { background-color: #155ab6; }
         button:active { transform: scale(0.98); }
         button:disabled { background-color: #cccccc; cursor: not-allowed; }
@@ -60,34 +92,37 @@
             margin-right: 10px; display: none;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #results {
+
+        /* Result Display Styles (for both pages) */
+        .result-display-area {
             margin-top: 30px; padding: 20px; background-color: #e9f2ff;
             border-radius: 8px; border: 1px solid #c6dfff; text-align: left;
             word-wrap: break-word; display: none; font-size: 0.95em;
-            min-height: 100px; /* Ensure space even when empty */
+            min-height: 100px;
         }
-        #results.error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
-        #results strong.title {
+        .result-display-area.error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .result-display-area strong.title {
             display: block; margin-bottom: 10px; color: #1a73e8; font-weight: 600; font-size: 1.1em;
         }
-        #results.error strong.title { color: #721c24; }
-        #results pre {
+        .result-display-area.error strong.title { color: #721c24; }
+        .result-display-area pre {
             background-color: #f8f9fa; padding: 15px; border-radius: 5px;
             border: 1px solid #dee2e6; font-family: monospace; white-space: pre-wrap;
             word-break: break-all; font-size: 0.9em; margin: 0; color: #212529;
         }
-        #results.error pre {
+        .result-display-area.error pre {
              color: #721c24; background-color: transparent; border: none; padding: 0;
              white-space: pre-wrap; font-family: inherit; font-size: 1em;
          }
+
         .info {
             background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb;
             padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: left; font-size: 0.9em;
         }
 
-        /* History List Styles */
+        /* History List Specific Styles */
         #historyList {
-            list-style: none; padding: 0; max-height: 400px; overflow-y: auto;
+            list-style: none; padding: 0; max-height: 300px; overflow-y: auto; /* Adjusted height */
             border: 1px solid #eee; border-radius: 5px; margin-bottom: 15px;
         }
         #historyList li {
@@ -98,72 +133,97 @@
         #historyList li:last-child { border-bottom: none; }
         #historyList li:hover { background-color: #f0f2f5; }
         #historyList li.selected { background-color: #e0eaff; font-weight: 500; }
-        #historyList li:empty::after { /* Show message if history is empty */
-            content: "No history yet.";
-            font-style: italic;
-            color: #888;
-            display: block;
-            text-align: center;
-            padding: 20px;
+        #historyList li:empty::after {
+            content: "No history yet."; font-style: italic; color: #888;
+            display: block; text-align: center; padding: 20px;
         }
+
+         /* History Page Buttons */
+         .history-actions {
+             display: flex;
+             justify-content: space-between; /* Space out buttons */
+             align-items: center;
+             margin-bottom: 20px; /* Space before result area */
+             gap: 15px;
+         }
+        .history-actions button {
+             margin-top: 0; /* Remove default top margin */
+             padding: 8px 15px;
+             font-size: 0.9em;
+             flex-shrink: 0; /* Prevent shrinking */
+         }
+        #showAllButton {
+             background-color: #28a745; /* Green */
+         }
+         #showAllButton:hover { background-color: #218838; }
         #clearHistoryButton {
-            background-color: #dc3545; /* Red for delete */
-            font-size: 0.9em; padding: 8px 15px; width: auto; /* Don't make full width */
-            display: block; /* Center it */
-            margin: 0 auto;
-        }
+             background-color: #dc3545; /* Red */
+         }
          #clearHistoryButton:hover { background-color: #c82333; }
 
-
-        @media (max-width: 900px) { /* Adjust layout for smaller screens */
-             body {
-                flex-direction: column; /* Stack vertically */
-                 align-items: center; /* Center items */
-            }
-             .container, .history-container {
-                 max-width: 95%; /* Allow more width */
-                 flex-basis: auto; /* Reset basis */
-             }
-        }
         @media (max-width: 600px) {
-            body { padding: 10px; } .container, .history-container { padding: 20px; }
-            h1 { font-size: 1.6em; } button#classifyButton { padding: 15px; }
+             .tab-button { padding: 10px 15px; font-size: 0.9em; }
+             h1 { font-size: 1.6em; }
+             .page-content { padding: 20px; }
+             .history-actions { flex-direction: column; gap: 10px; }
+             .history-actions button { width: 100%; }
         }
     </style>
 </head>
 <body>
-    <!-- Main Content Area -->
-    <div class="container">
-        <h1>Web Page Classifier</h1>
+    <div class="main-wrapper">
+         <h1>Web Page Classifier</h1>
 
-        <div class="info">
-            Enter a URL. The classification result (JSON) will be displayed and saved locally in your browser's history.
+        <!-- Tab Navigation -->
+        <div class="tab-container">
+            <button class="tab-button active" data-target="classifierPage">Classifier</button>
+            <button class="tab-button" data-target="historyPage">History</button>
         </div>
 
-        <div class="form-group">
-            <label for="pageUrl">Web Page URL:</label>
-            <input type="url" id="pageUrl" placeholder="https://example.com/article" required>
+        <!-- Classifier Page Content -->
+        <div id="classifierPage" class="page-content active">
+            <div class="info">
+                Enter a URL. The classification result (JSON) will be displayed below and saved to history.
+            </div>
+
+            <div class="form-group">
+                <label for="pageUrl">Web Page URL:</label>
+                <input type="url" id="pageUrl" placeholder="https://example.com/article" required>
+            </div>
+
+            <button id="classifyButton">
+                <div class="loader" id="loader"></div>
+                <span>Classify URL</span>
+            </button>
+
+            <!-- Result display specific to classifier page -->
+            <div id="classifierResultDisplay" class="result-display-area">
+                 <strong class="title">Result:</strong>
+                 <pre><!-- API result here --></pre>
+            </div>
         </div>
 
-        <button id="classifyButton">
-            <div class="loader" id="loader"></div>
-            <span>Classify URL</span>
-        </button>
+        <!-- History Page Content -->
+        <div id="historyPage" class="page-content">
+             <h2>Classification History</h2>
 
-        <div id="results">
-            <!-- JSON Classification result will be displayed here -->
+             <ul id="historyList">
+                 <li></li> <!-- Placeholder for empty message styling -->
+             </ul>
+
+             <div class="history-actions">
+                 <button id="showAllButton">Show All URLs & Classifications</button>
+                 <button id="clearHistoryButton">Clear History</button>
+             </div>
+
+            <!-- Result display specific to history page -->
+            <div id="historyResultDisplay" class="result-display-area">
+                <strong class="title">Selected / All History:</strong>
+                <pre><!-- Selected or All history JSON here --></pre>
+            </div>
         </div>
-    </div>
 
-    <!-- History Sidebar Area -->
-    <div class="history-container">
-        <h2>Classification History</h2>
-        <ul id="historyList">
-            <!-- History items will be added here by JavaScript -->
-             <li></li> <!-- Placeholder for empty message styling -->
-        </ul>
-        <button id="clearHistoryButton">Clear History</button>
-    </div>
+    </div> <!-- End main-wrapper -->
 
     <script>
         // --- Configuration ---
@@ -173,26 +233,29 @@
         // --- DOM Elements ---
         const classifyButton = document.getElementById('classifyButton');
         const urlInput = document.getElementById('pageUrl');
-        const resultsDiv = document.getElementById('results');
         const loader = document.getElementById('loader');
         const buttonText = classifyButton.querySelector('span');
+        const classifierResultDisplay = document.getElementById('classifierResultDisplay'); // Classifier result area
+        const historyResultDisplay = document.getElementById('historyResultDisplay');   // History result area
         const historyList = document.getElementById('historyList');
         const clearHistoryButton = document.getElementById('clearHistoryButton');
+        const showAllButton = document.getElementById('showAllButton');
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const pageContents = document.querySelectorAll('.page-content');
 
         // --- State ---
-        let classificationHistory = []; // In-memory copy of the history
+        let classificationHistory = []; // In-memory copy
 
         // --- Functions ---
 
         function showLoading(isLoading) {
-            // (Keep this function exactly as before)
+            // Only affect the classifier button
             if (isLoading) {
                 classifyButton.disabled = true;
-                loader.style.display = 'inline-block';
+                loader.style.display = 'inline-block'; // Changed from 'flex' if using inline-flex on button
                 buttonText.textContent = 'Classifying...';
-                // Don't hide results immediately, user might be viewing history
-                // resultsDiv.style.display = 'none';
-                resultsDiv.classList.remove('error');
+                classifierResultDisplay.style.display = 'none'; // Hide previous classifier result
+                classifierResultDisplay.classList.remove('error');
             } else {
                 classifyButton.disabled = false;
                 loader.style.display = 'none';
@@ -200,44 +263,44 @@
             }
         }
 
-        // Updated display function to accept data and optional source
-        function displayClassification(data, isError = false, source = 'API') {
-            resultsDiv.innerHTML = ''; // Clear previous content
-            resultsDiv.style.display = 'block'; // Make sure it's visible
+        // Generic function to display results in a specific area
+        function displayResultInArea(areaElement, data, isError = false, titlePrefix = 'Result') {
+             areaElement.innerHTML = ''; // Clear previous content
+             areaElement.style.display = 'block'; // Make sure it's visible
 
-            const title = document.createElement('strong');
-            title.classList.add('title');
+             const title = document.createElement('strong');
+             title.classList.add('title');
+             const resultOutput = document.createElement('pre');
 
-            const resultOutput = document.createElement('pre');
+             if (isError) {
+                 areaElement.classList.add('error');
+                 title.textContent = `Error:`; // Keep title simple for errors
+                 resultOutput.textContent = (typeof data === 'string') ? data : JSON.stringify(data, null, 2);
+             } else {
+                 areaElement.classList.remove('error');
+                 title.textContent = `${titlePrefix}:`;
+                 resultOutput.textContent = JSON.stringify(data, null, 2);
+             }
 
-            if (isError) {
-                resultsDiv.classList.add('error');
-                title.textContent = 'Error:';
-                resultOutput.textContent = (typeof data === 'string') ? data : JSON.stringify(data, null, 2);
-            } else {
-                resultsDiv.classList.remove('error');
-                title.textContent = `Classification Result (${source}):`; // Indicate source
-                // Stringify the received JavaScript object with indentation
-                resultOutput.textContent = JSON.stringify(data, null, 2);
-            }
+             areaElement.appendChild(title);
+             areaElement.appendChild(resultOutput);
+         }
 
-            resultsDiv.appendChild(title);
-            resultsDiv.appendChild(resultOutput);
-        }
 
-        // Function to render the history list in the UI
+        // Render the history list in the UI (targets #historyList)
         function renderHistoryList() {
             historyList.innerHTML = ''; // Clear existing list items
 
             if (classificationHistory.length === 0) {
-                // Add placeholder for empty message styling to work
                  const emptyLi = document.createElement('li');
                  historyList.appendChild(emptyLi);
-                clearHistoryButton.style.display = 'none'; // Hide clear button if empty
+                // clearHistoryButton.style.display = 'none'; // Managed by CSS/layout now potentially
+                // showAllButton.style.display = 'none';
                 return;
             }
 
-             clearHistoryButton.style.display = 'block'; // Show clear button if not empty
+            // clearHistoryButton.style.display = 'inline-block';
+            // showAllButton.style.display = 'inline-block';
 
             classificationHistory.forEach((item, index) => {
                 const li = document.createElement('li');
@@ -246,65 +309,86 @@
                 li.dataset.index = index; // Store index for easy retrieval
 
                 li.addEventListener('click', () => {
-                    // Remove 'selected' class from any other item
+                    // Highlight selection
                     document.querySelectorAll('#historyList li.selected').forEach(el => el.classList.remove('selected'));
-                    // Add 'selected' class to the clicked item
                     li.classList.add('selected');
-                    // Display the classification for this history item
-                    displayClassification(item.classification, false, 'History');
+                    // Display the classification for this history item IN THE HISTORY AREA
+                    const selectedItem = classificationHistory[index];
+                    if (selectedItem) {
+                         displayResultInArea(historyResultDisplay, selectedItem.classification, false, 'Selected History');
+                    }
                 });
-
                 historyList.appendChild(li);
             });
         }
 
-        // Function to load history from localStorage
+        // Load history from localStorage
         function loadHistory() {
             try {
                 const storedHistory = localStorage.getItem(LOCAL_STORAGE_KEY);
-                if (storedHistory) {
-                    classificationHistory = JSON.parse(storedHistory);
-                } else {
-                    classificationHistory = [];
-                }
+                classificationHistory = storedHistory ? JSON.parse(storedHistory) : [];
             } catch (error) {
-                console.error("Error loading or parsing history from localStorage:", error);
-                classificationHistory = []; // Reset to empty array on error
-                 // Optionally notify user: displayClassification("Could not load history.", true);
+                console.error("Error loading/parsing history:", error);
+                classificationHistory = [];
             }
-             renderHistoryList(); // Update the UI with loaded history
+            renderHistoryList(); // Render into the history page list
         }
 
-        // Function to save the current history state to localStorage
+        // Save history state to localStorage
         function saveHistory() {
              try {
                  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(classificationHistory));
              } catch (error) {
-                 console.error("Error saving history to localStorage:", error);
-                 // Notify user if storage is full?
-                 displayClassification("Could not save history (Storage might be full).", true);
+                 console.error("Error saving history:", error);
+                 displayResultInArea(classifierResultDisplay, "Could not save history (Storage might be full).", true);
              }
         }
 
-        // Function to add a new entry and save
+        // Add a new entry and save
          function addHistoryEntry(url, classificationData) {
-             // Optional: Prevent duplicates? Or update existing?
-             // For now, just add:
              const newEntry = { url: url, classification: classificationData };
-             classificationHistory.unshift(newEntry); // Add to the beginning of the array
+             // Optional: Check for duplicates by URL and update instead of adding?
+             // Simple add to top for now:
+             classificationHistory.unshift(newEntry);
              saveHistory();
-             renderHistoryList(); // Update the list view
+             renderHistoryList(); // Update the list view on the history page
+         }
+
+        // Show the entire history JSON in the history display area
+        function showAllHistory() {
+             if (classificationHistory.length === 0) {
+                  displayResultInArea(historyResultDisplay, "History is empty.", true, "Full History");
+             } else {
+                 displayResultInArea(historyResultDisplay, classificationHistory, false, "All Stored Classifications");
+             }
+              // Deselect any specific list item
+             document.querySelectorAll('#historyList li.selected').forEach(el => el.classList.remove('selected'));
          }
 
 
-        // Function to clear the history
+        // Clear the history
         function clearHistory() {
             if (confirm("Are you sure you want to clear the entire classification history?")) {
-                classificationHistory = []; // Clear in-memory array
-                saveHistory(); // Persist the empty array to localStorage
-                renderHistoryList(); // Update the UI
-                resultsDiv.style.display = 'none'; // Hide results area
+                classificationHistory = [];
+                saveHistory();
+                renderHistoryList();
+                historyResultDisplay.style.display = 'none'; // Hide history result area
             }
+        }
+
+        // Switch active tab and page content
+        function switchTab(event) {
+             const targetId = event.currentTarget.dataset.target;
+
+             // Update tab button styles
+             tabButtons.forEach(button => {
+                 button.classList.toggle('active', button.dataset.target === targetId);
+             });
+
+             // Show/Hide page content
+             pageContents.forEach(page => {
+                 page.classList.toggle('active', page.id === targetId);
+             });
         }
 
 
@@ -313,14 +397,11 @@
             const pageUrl = urlInput.value.trim();
 
             if (!pageUrl || !/^https?:\/\/.+/.test(pageUrl)) {
-                displayClassification("Please enter a valid URL (starting with http:// or https://).", true, 'Input Error');
+                 displayResultInArea(classifierResultDisplay, "Please enter a valid URL.", true);
                 return;
             }
 
             showLoading(true);
-            // Clear previous selection highlight in history
-            document.querySelectorAll('#historyList li.selected').forEach(el => el.classList.remove('selected'));
-
 
             try {
                 const response = await fetch(NETLIFY_FUNCTION_ENDPOINT, {
@@ -336,18 +417,17 @@
                 }
 
                 if (data.classification && typeof data.classification === 'object') {
-                    // Display the new result from API
-                    displayClassification(data.classification, false, 'API');
-                    // Add to history
+                    // Display the new result in the CLASSIFIER area
+                    displayResultInArea(classifierResultDisplay, data.classification, false, 'API Result');
+                    // Add to history (updates list in history tab)
                     addHistoryEntry(pageUrl, data.classification);
                 } else {
-                    console.error("Unexpected response format:", data);
-                     throw new Error("Received an unexpected response format from the classification function.");
+                     throw new Error("Received an unexpected response format.");
                 }
 
             } catch (error) {
                 console.error("Error during classification:", error);
-                displayClassification(`Classification failed: ${error.message}`, true, 'Error');
+                 displayResultInArea(classifierResultDisplay, `Classification failed: ${error.message}`, true);
             } finally {
                 showLoading(false);
             }
@@ -355,12 +435,16 @@
 
         // --- Initialization and Event Listeners ---
 
-        // Load history when the script runs
+        // Load history on startup
         loadHistory();
 
-        // Attach event listeners
+        // Attach tab switching listeners
+        tabButtons.forEach(button => button.addEventListener('click', switchTab));
+
+        // Attach other listeners
         classifyButton.addEventListener('click', classifyUrlContent);
         clearHistoryButton.addEventListener('click', clearHistory);
+        showAllButton.addEventListener('click', showAllHistory);
 
         urlInput.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
@@ -368,6 +452,11 @@
                 classifyUrlContent();
             }
         });
+
+         // Ensure the default tab content is shown initially (redundant if HTML class is set, but safe)
+         document.getElementById('classifierPage').classList.add('active');
+         document.getElementById('historyPage').classList.remove('active');
+
 
     </script>
 </body>
