@@ -77,15 +77,14 @@ Provide the output ONLY as a valid JSON object adhering strictly to the structur
 JSON Output Structure:
 {
   "classification": {
-    "url_type": "...",           // e.g., "Website", "Blog", "News Site", "Forum", "E-commerce", "File", "Media Page", "Data Endpoint", "Other"
-    "content_format": "...",     // e.g., "HTML", "PDF", "Image", "Video", "Audio", "JSON", "XML", "Text File", "Other"
+    "content_format": "...",     // e.g., "Website", "Blog", "Forum", "PDF", "Image", "Video", "Audio", "JSON", "XML", "Text File","Media Page", "Other"
     "content_type_hierarchy": [  // Array representing hierarchy, from general to specific.
       // e.g., ["Text", "News Article", "Technology"]
     ],
     "primary_language": "..."    // e.g., "English", "Spanish", "Japanese", "Undetermined"
   },
   "confidence": "High | Medium | Low",
-  "keywords": ["...", "...", "..."]
+  "keywords": ["...", "...", "..."] // minimum 5 keywords, maximum 15
 }
 
 Target URL (for context): ${targetUrl}
