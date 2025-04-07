@@ -15,6 +15,68 @@ function extractTextFromHtml(html) {
     return text;
 }
 
+// --- Utility: Find or create branch using normalized comparisons ---
+function getOrCreateBranch(currentLevel, categoryName, isLast = false) {
+    const normalized = categoryName.trim().toLowerCase();
+    // find a branch key that matches ignoring case
+    for (const key of Object.keys(currentLevel)) {
+        if (key.trim().toLowerCase() === normalized) {
+            return { key, branch: currentLevel[key] };
+        }
+    }
+    // Not found: create a new branch.
+    // For the final level, we want an array to hold entries.
+    const newBranch = isLast ? [] : {};
+    currentLevel[categoryName] = newBranch;
+    return { key: categoryName, branch: newBranch };
+}
+
+// --- Updated Tree Building Function ---
+function buildUrlTree(history) {
+    const tree = {}; // Root of the tree
+
+    history.forEach(item => {
+        if (!item.classification) return;
+        const classification = item.classification;
+        if (!classification) return;
+
+        // Level 1: URL Type
+        const urlType = classification.url_type || 'Unknown Type';
+        const { branch: urlTypeBranch } = getOrCreateBranch(tree, urlType);
+        
+        // Level 2: Content Format — skip if "HTML"
+        let currentLevel = urlTypeBranch;
+        const contentFormat = classification.content_format || 'Unknown Format';
+        if (contentFormat.trim().toLowerCase() !== 'html') {
+            const result = getOrCreateBranch(currentLevel, contentFormat);
+            currentLevel = result.branch;
+        }
+        // Else: if it is HTML, use the existing level without adding a branch.
+
+        // Levels 3+: Content Type Hierarchy
+        const hierarchy = (Array.isArray(classification.content_type_hierarchy) && classification.content_type_hierarchy.length > 0)
+                              ? classification.content_type_hierarchy
+                              : ['Unknown Category'];
+
+        hierarchy.forEach((category, index) => {
+            const isLastLevel = (index === hierarchy.length - 1);
+            if (isLastLevel) {
+                // For leaf level, get the branch (an array) or create if not exists.
+                const { branch: leafBranch } = getOrCreateBranch(currentLevel, category, true);
+                // Add the URL entry object if not already present.
+                if (!leafBranch.some(entry => entry.id === item.id)) {
+                    leafBranch.push({ id: item.id, url: item.url });
+                }
+            } else {
+                const { branch: nextLevel } = getOrCreateBranch(currentLevel, category);
+                currentLevel = nextLevel;
+            }
+        });
+    });
+    console.log("Built Tree:", tree);
+    return tree;
+}
+
 // --- Netlify Function Handler ---
 exports.handler = async (event, context) => {
     // 1. Check Method (Keep as is)
