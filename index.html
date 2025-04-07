@@ -41,6 +41,7 @@
             --radius-lg: 1rem;
         }
 
+        /* ... (rest of CSS styles remain exactly the same as previous version) ... */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -604,6 +605,7 @@
 
         /* --- Responsive Styles --- */
         @media (max-width: 768px) {
+             /* ... same as before ... */
             .main-wrapper {
                 border-radius: var(--radius);
             }
@@ -611,13 +613,12 @@
             .page-content {
                 padding: 1.25rem;
             }
-            /* Adjust label width more aggressively */
             #urlTreeContainer .category-label > .label-text {
-                 max-width: calc(100% - 100px); /* Adjust based on button count */
+                 max-width: calc(100% - 100px);
                  overflow: hidden;
                  text-overflow: ellipsis;
                  white-space: nowrap;
-                 display: inline-block; /* Needed for text-overflow */
+                 display: inline-block;
             }
             #urlTreeContainer .url-link a {
                  max-width: calc(100% - 40px);
@@ -625,6 +626,7 @@
         }
 
         @media (max-width: 600px) {
+             /* ... same as before ... */
             body {
                 padding: 10px;
             }
@@ -670,7 +672,7 @@
                 width: calc(100% - 20px);
             }
              #urlTreeContainer .category-label > .label-text {
-                  max-width: calc(100% - 120px); /* Even more aggressive */
+                  max-width: calc(100% - 120px);
              }
              #urlTreeContainer .url-link a {
                   max-width: calc(100% - 50px);
@@ -684,6 +686,7 @@
 
         <!-- Tab Navigation -->
         <div class="tab-container">
+            <!-- ... tabs ... -->
             <button class="tab-button active" data-target="classifierPage">
                 <i class="fas fa-magnifying-glass"></i>
                 <span>Classifier</span>
@@ -700,8 +703,9 @@
 
         <!-- Classifier Page Content -->
         <div id="classifierPage" class="page-content active">
+             <!-- ... content ... -->
              <div class="info">
-                <i class="fas fa-circle-info"></i> Enter a URL. The classification result (JSON) will be displayed below and saved to history.
+                <i class="fas fa-circle-info"></i> Enter a URL. The classification result (JSON) will be displayed below and saved to history using organizational heuristics.
             </div>
             <div class="form-group">
                 <label for="pageUrl">Web Page URL:</label>
@@ -712,15 +716,16 @@
                 <span>Classify URL</span>
             </button>
             <div id="classifierResultDisplay" class="result-display-area">
-                <strong class="title">Result:</strong>
+                <strong class="title">API Result (Raw):</strong> <!-- Changed title slightly -->
                 <pre></pre>
             </div>
         </div>
 
         <!-- History Page Content -->
         <div id="historyPage" class="page-content">
+            <!-- ... content ... -->
             <h2>Classification History List</h2>
-            <ul id="historyList"><li></li></ul> <!-- Initial empty li placeholder handled by JS -->
+            <ul id="historyList"><li></li></ul>
             <div class="history-actions">
                 <button id="showAllButton">
                     <i class="fas fa-list"></i>
@@ -739,6 +744,7 @@
 
         <!-- Tree Page Content -->
         <div id="treePage" class="page-content">
+            <!-- ... content ... -->
             <h2>URL Classification Tree</h2>
             <div class="info">
                  <i class="fas fa-circle-info"></i> Drag & drop a URL (<i class="fas fa-link"></i>) onto a category (<i class="fas fa-folder"></i>) to move.
@@ -758,10 +764,15 @@
         // --- Configuration ---
         const NETLIFY_FUNCTION_ENDPOINT = '/.netlify/functions/classify-url';
         const LOCAL_STORAGE_KEY = 'urlClassificationHistory';
-        const DRAG_DATA_TYPE = 'text/plain'; // Data type for drag/drop ID
-        const DUMMY_ITEM_PREFIX = 'placeholder://dummy_'; // Prefix for placeholder URLs
+        const DRAG_DATA_TYPE = 'text/plain';
+        const DUMMY_ITEM_PREFIX = 'placeholder://dummy_';
+        const MAX_ITEMS_PER_CATEGORY = 8; // Threshold for auto-subcategorization
+        const MIN_KEYWORD_LENGTH = 4; // Minimum length for a keyword to be considered for subcategorization
+        // Simple stop words list
+        const STOP_WORDS = new Set(['the', 'a', 'an', 'and', 'or', 'but', 'is', 'are', 'was', 'were', 'in', 'on', 'at', 'to', 'for', 'with', 'of', 'it', 'this', 'that', 'from', 'by', 'as', 'new', 'news', 'web', 'site', 'page', 'com', 'org', 'net', 'html', 'http', 'https']);
 
         // --- DOM Elements ---
+        // ... (no changes)
         const classifyButton = document.getElementById('classifyButton');
         const urlInput = document.getElementById('pageUrl');
         const loader = document.getElementById('loader');
@@ -776,11 +787,13 @@
         const pageContents = document.querySelectorAll('.page-content');
 
         // --- State ---
-        let classificationHistory = []; // In-memory copy
-        let draggedElement = null; // Keep track of the element being dragged
+        // ... (no changes)
+        let classificationHistory = [];
+        let draggedElement = null;
 
         // --- Helper: Generate Unique ID ---
-        function generateId(isDummy = false) {
+        // ... (no changes)
+         function generateId(isDummy = false) {
             const randomPart = Math.random().toString(36).substring(2);
             return isDummy ? DUMMY_ITEM_PREFIX + randomPart : Date.now().toString(36) + randomPart;
         }
@@ -792,7 +805,8 @@
                 classifyButton.disabled = true;
                 loader.style.display = 'inline-block';
                 buttonText.textContent = 'Classifying...';
-                classifierResultDisplay.style.display = 'none';
+                // Keep previous result visible during loading if desired? Or hide:
+                // classifierResultDisplay.style.display = 'none';
                 classifierResultDisplay.classList.remove('error');
             } else {
                 classifyButton.disabled = false;
@@ -802,7 +816,7 @@
         }
 
         function displayResultInArea(areaElement, data, isError = false, titlePrefix = 'Result') { /* ... no changes ... */
-             areaElement.innerHTML = ''; // Clear previous content
+            areaElement.innerHTML = ''; // Clear previous content
             areaElement.style.display = 'block';
             const title = document.createElement('strong');
             title.classList.add('title');
@@ -822,7 +836,7 @@
 
         // Delete an entry from history by id
         function deleteHistoryEntryById(entryId) { /* ... no changes ... */
-            const initialLength = classificationHistory.length;
+             const initialLength = classificationHistory.length;
             classificationHistory = classificationHistory.filter(entry => entry.id !== entryId);
             if (classificationHistory.length < initialLength) {
                 saveHistory();
@@ -839,7 +853,7 @@
 
         // --- History List Rendering and Management ---
 
-        function renderHistoryList() {
+        function renderHistoryList() { /* ... no changes ... */
             historyList.innerHTML = '';
             const nonDummyHistory = classificationHistory.filter(item => !item.id.startsWith(DUMMY_ITEM_PREFIX)); // Exclude dummies
 
@@ -888,9 +902,8 @@
                 historyList.appendChild(li);
             });
         }
-
         function loadHistory() { /* ... no changes ... */
-            try {
+             try {
                 const storedHistory = localStorage.getItem(LOCAL_STORAGE_KEY);
                 classificationHistory = storedHistory ? JSON.parse(storedHistory) : [];
                  if (!Array.isArray(classificationHistory)) {
@@ -906,13 +919,10 @@
             const treeData = buildUrlTree(classificationHistory);
             renderTree(treeData, urlTreeContainer);
         }
-
         function saveHistory() { /* ... no changes ... */
              try {
-                // Filter out potential null/undefined entries just in case
                 const validHistory = classificationHistory.filter(item => item && item.id);
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(validHistory));
-                // Update the in-memory array to match what was saved
                 classificationHistory = validHistory;
             } catch (error) {
                 console.error("Error saving history:", error);
@@ -920,16 +930,51 @@
             }
         }
 
-        function addHistoryEntry(url, classificationData) { /* ... no changes ... */
-            const newEntry = { id: generateId(), url: url, classification: classificationData };
-            classificationHistory.unshift(newEntry);
-            saveHistory();
+        // --- MODIFIED: Add History Entry Orchestration ---
+        function addHistoryEntry(url, rawClassificationData) {
+            if (!rawClassificationData || !rawClassificationData.classification) {
+                console.error("Invalid classification data received, cannot add to history.", rawClassificationData);
+                return;
+            }
+
+            // Deep clone the raw data to avoid modifying the object displayed in the "API Result" area
+            const classificationData = JSON.parse(JSON.stringify(rawClassificationData));
+            const proposedClassification = classificationData.classification; // The inner object
+
+            // 1. Determine the optimal path (reuse existing or extend)
+            const optimalPath = determineOptimalPath(proposedClassification, classificationHistory);
+
+            // Update the working classification data with the chosen path
+            proposedClassification.url_type = optimalPath.urlType;
+            proposedClassification.content_format = optimalPath.format;
+            proposedClassification.content_type_hierarchy = [...optimalPath.hierarchy]; // Use a copy
+
+            // 2. Check for subcategorization based on width
+            const newItemKeywords = proposedClassification.keywords || [];
+            const finalHierarchy = checkAndSubcategorizeIfNeeded(optimalPath, classificationHistory, newItemKeywords);
+
+            // Update the hierarchy one last time if subcategorization occurred
+            proposedClassification.content_type_hierarchy = finalHierarchy;
+
+            // 3. Create and add the new entry
+            const newEntry = {
+                id: generateId(),
+                url: url,
+                classification: classificationData // Store the whole processed structure
+            };
+
+            classificationHistory.unshift(newEntry); // Add to beginning
+            console.log(`Added entry ${newEntry.id} with final path: [${optimalPath.urlType}/${optimalPath.format}]/[${finalHierarchy.join('/')}]`);
+
+            // 4. Save and re-render
+            saveHistory(); // Includes saving modifications made during subcategorization
             renderHistoryList();
             const treeData = buildUrlTree(classificationHistory);
             renderTree(treeData, urlTreeContainer);
         }
 
-        function showAllHistory() {
+
+        function showAllHistory() { /* ... no changes ... */
             const nonDummyHistory = classificationHistory.filter(item => !item.id.startsWith(DUMMY_ITEM_PREFIX));
             if (nonDummyHistory.length === 0) {
                 displayResultInArea(historyResultDisplay, "History is empty.", true, "Full History");
@@ -939,9 +984,8 @@
             }
             document.querySelectorAll('#historyList li.selected').forEach(el => el.classList.remove('selected'));
         }
-
         function clearHistory() { /* ... no changes ... */
-             if (confirm("Are you sure you want to clear the entire classification history? This cannot be undone.")) {
+            if (confirm("Are you sure you want to clear the entire classification history? This cannot be undone.")) {
                 classificationHistory = [];
                 saveHistory();
                 renderHistoryList();
@@ -950,27 +994,25 @@
             }
         }
 
-        // --- Tree Building and Rendering Logic ---
 
+        // --- Tree Building and Rendering Logic ---
+        // ... (buildUrlTree and renderTreeNode remain exactly the same as the previous version) ...
         // Helper to safely get nested properties
         const get = (obj, path, defaultValue = undefined) => { /* ... no changes ... */
-          const travel = (regexp) =>
-            String.prototype.split
-              .call(path, regexp)
-              .filter(Boolean)
-              .reduce((res, key) => (res !== null && res !== undefined ? res[key] : res), obj);
-          const result = travel(/[,[\]]+?/) || travel(/[,[\].]+?/);
-          return result === undefined || result === obj ? defaultValue : result;
+            const travel = (regexp) =>
+                String.prototype.split
+                .call(path, regexp)
+                .filter(Boolean)
+                .reduce((res, key) => (res !== null && res !== undefined ? res[key] : res), obj);
+            const result = travel(/[,[\]]+?/) || travel(/[,[\].]+?/);
+            return result === undefined || result === obj ? defaultValue : result;
         };
 
-
-        function buildUrlTree(history) { /* ... logic mostly same, ensures _meta/_items */
-             const tree = {}; // Root of the tree
+        function buildUrlTree(history) { /* ... no changes needed ... */
+            const tree = {}; // Root of the tree
 
             history.forEach(item => {
-                // Skip if item or classification is invalid
-                 if (!item || !item.id || !item.classification) return;
-
+                if (!item || !item.id || !item.classification) return;
                 const classification = get(item, 'classification.classification');
                 if (!classification) return;
 
@@ -981,70 +1023,75 @@
                                   : ['Unknown Category'];
 
                 let currentLevel = tree;
-                let parentMetaHierarchy = []; // Track hierarchy for meta
+                let parentMetaHierarchy = [];
 
                 // Level 1: URL Type
-                if (!currentLevel[urlType]) currentLevel[urlType] = { _meta: { urlType: urlType, format: null, hierarchy: [urlType] } }; // Hierarchy includes urlType
-                parentMetaHierarchy = currentLevel[urlType]._meta.hierarchy;
-                currentLevel = currentLevel[urlType];
+                 const metaUrlType = { urlType: urlType, format: null, hierarchy: [urlType] };
+                 if (!currentLevel[urlType]) currentLevel[urlType] = { _meta: metaUrlType };
+                 // Ensure meta exists even if node already present
+                 else if (!currentLevel[urlType]._meta) currentLevel[urlType]._meta = metaUrlType;
+                 parentMetaHierarchy = currentLevel[urlType]._meta.hierarchy;
+                 currentLevel = currentLevel[urlType];
+
 
                 // Level 2: Content Format (Conditional based on 'HTML')
                 let formatKey = format;
                 let actualFormatForMeta = format;
                 let formatSkipped = false;
                 if (format.trim().toLowerCase() !== 'html') {
-                    if (!currentLevel[formatKey]) currentLevel[formatKey] = { _meta: { urlType: urlType, format: actualFormatForMeta, hierarchy: [...parentMetaHierarchy, formatKey] } };
-                    parentMetaHierarchy = currentLevel[formatKey]._meta.hierarchy; // Update parent hierarchy for next level
+                    const metaFormat = { urlType: urlType, format: actualFormatForMeta, hierarchy: [...parentMetaHierarchy, formatKey] };
+                    if (!currentLevel[formatKey]) currentLevel[formatKey] = { _meta: metaFormat };
+                    else if (!currentLevel[formatKey]._meta) currentLevel[formatKey]._meta = metaFormat;
+                    parentMetaHierarchy = currentLevel[formatKey]._meta.hierarchy;
                     currentLevel = currentLevel[formatKey];
                 } else {
                     actualFormatForMeta = 'HTML';
                     formatSkipped = true;
-                    // Parent hierarchy remains the urlType's hierarchy
                 }
 
                 // Levels 3+: Content Type Hierarchy
                 hierarchy.forEach((category, index) => {
                     const isLastLevel = index === hierarchy.length - 1;
-                    // Construct the *full* hierarchy path for the meta of the *current* category being processed
                     const currentMetaHierarchy = formatSkipped
                         ? [urlType, ...hierarchy.slice(0, index + 1)]
                         : [urlType, formatKey, ...hierarchy.slice(0, index + 1)];
 
+                    const metaHierarchy = {
+                         urlType: urlType,
+                         format: actualFormatForMeta,
+                         hierarchy: currentMetaHierarchy
+                     };
+
                      if (!currentLevel[category]) {
-                         const meta = {
-                             urlType: urlType,
-                             format: actualFormatForMeta, // Use the determined format
-                             hierarchy: currentMetaHierarchy // Store full path in meta
-                         };
-                         // Initialize with _items only if it's the last level *and* we are adding a real item
-                         currentLevel[category] = isLastLevel && !item.id.startsWith(DUMMY_ITEM_PREFIX)
-                             ? { _meta: meta, _items: [] }
-                             : { _meta: meta }; // Otherwise, just create the node with meta
+                         currentLevel[category] = { _meta: metaHierarchy };
+                         // Initialize _items only if it's the last level *and* we are adding a real item
+                         if (isLastLevel && !item.id.startsWith(DUMMY_ITEM_PREFIX)) {
+                            currentLevel[category]._items = [];
+                         }
+                     } else if (!currentLevel[category]._meta) {
+                          // Ensure meta exists if node was already there
+                          currentLevel[category]._meta = metaHierarchy;
                      }
 
-                     // Ensure _items array exists if it's the last level and we're adding a real item
+
                      if (isLastLevel && !item.id.startsWith(DUMMY_ITEM_PREFIX)) {
-                          if (!currentLevel[category]._items) {
+                          if (!currentLevel[category]._items) { // Ensure _items exists
                               currentLevel[category]._items = [];
                           }
-                          // Add the URL entry object if not already present
                           if (!currentLevel[category]._items.some(entry => entry.id === item.id)) {
                               currentLevel[category]._items.push({ id: item.id, url: item.url });
                           }
                      }
 
-                     // Move down only if not the last level
                      if (!isLastLevel) {
                         currentLevel = currentLevel[category];
                      }
                 });
             });
-             // console.log("Built Tree:", JSON.stringify(tree, null, 2));
             return tree;
         }
 
-
-        function renderTree(treeData, containerElement) { /* ... no changes ... */
+        function renderTree(treeData, containerElement) { /* ... no changes needed ... */
              containerElement.innerHTML = '';
             if (Object.keys(treeData).length === 0) {
                 containerElement.innerHTML = '<div class="empty-tree">No classification data available to build the tree.</div>';
@@ -1055,37 +1102,31 @@
             renderTreeNode(treeData, rootUl);
         }
 
-        // Modified renderTreeNode to add Create Folder icon
-        function renderTreeNode(node, parentUl) {
-            const categories = Object.keys(node).filter(key => key !== '_meta' && key !== '_items').sort();
+        function renderTreeNode(node, parentUl) { /* ... no changes needed ... */
+             const categories = Object.keys(node).filter(key => key !== '_meta' && key !== '_items').sort();
 
             categories.forEach(category => {
                 const li = document.createElement('li');
                 const nodeValue = node[category];
                 const meta = nodeValue._meta;
-                const items = nodeValue._items || []; // Default to empty array
+                const items = nodeValue._items || [];
 
                 const isFolder = Object.keys(nodeValue).some(k => k !== '_meta' && k !== '_items');
                 const hasRealItems = items.some(item => !item.id.startsWith(DUMMY_ITEM_PREFIX));
-                const hasOnlyDummyItems = items.length > 0 && !hasRealItems;
-                const isEmptyFolder = !isFolder && items.length === 0; // Explicitly no subfolders, no items
-
 
                  if (!meta) {
                     console.warn("Node missing _meta data:", category, nodeValue);
                     return;
                  }
 
-                // --- Create Header (Drop Target) ---
                 const header = document.createElement('div');
                 header.classList.add('category-label');
                 header.dataset.targetUrlType = meta.urlType;
-                header.dataset.targetFormat = meta.format === null ? 'HTML' : meta.format; // Handle null format from meta
+                header.dataset.targetFormat = meta.format === null ? 'HTML' : meta.format;
                 header.dataset.targetHierarchy = JSON.stringify(meta.hierarchy);
 
-                // --- Left side: Toggle, Folder Icon, Label ---
                 const toggleIcon = document.createElement('i');
-                if (isFolder || items.length > 0) { // Show toggle if it has subfolders OR any items (even dummy)
+                if (isFolder || items.length > 0) {
                    toggleIcon.classList.add('toggle-icon', 'fas', 'fa-chevron-down');
                 } else {
                    toggleIcon.classList.add('toggle-icon', 'fas', 'fa-minus');
@@ -1103,46 +1144,39 @@
                 header.appendChild(iconSpan);
                 header.appendChild(labelSpan);
 
-                 // --- Right side: Action Buttons Container ---
                  const actionsContainer = document.createElement('div');
                  actionsContainer.classList.add('category-actions');
 
-                 // Rename Icon
                  const renameIcon = document.createElement('button');
                  renameIcon.classList.add('action-button', 'rename-icon');
                  renameIcon.innerHTML = '<i class="fas fa-pencil-alt"></i>';
                  renameIcon.title = `Rename category "${category}"`;
                  renameIcon.dataset.categoryName = category;
-                 renameIcon.dataset.fullHierarchyPath = JSON.stringify(meta.hierarchy); // Use meta hierarchy path
+                 renameIcon.dataset.fullHierarchyPath = JSON.stringify(meta.hierarchy);
                  actionsContainer.appendChild(renameIcon);
 
-                 // Create Subfolder Icon
                  const createFolderIcon = document.createElement('button');
                  createFolderIcon.classList.add('action-button', 'create-folder-icon');
                  createFolderIcon.innerHTML = '<i class="fas fa-folder-plus"></i>';
                  createFolderIcon.title = `Create subfolder in "${category}"`;
-                 // Store parent data needed for creation
                  createFolderIcon.dataset.parentUrlType = meta.urlType;
-                 createFolderIcon.dataset.parentFormat = meta.format === null ? 'HTML' : meta.format; // Handle null format
+                 createFolderIcon.dataset.parentFormat = meta.format === null ? 'HTML' : meta.format;
                  createFolderIcon.dataset.parentHierarchy = JSON.stringify(meta.hierarchy);
                  actionsContainer.appendChild(createFolderIcon);
 
-                 header.appendChild(actionsContainer); // Add actions container to header
+                 header.appendChild(actionsContainer);
 
                 li.appendChild(header);
 
-                // --- Create Nested List (ul) for Children ---
                 let nestedUl = null;
-                if (isFolder || items.length > 0) { // Create UL if subfolders OR items exist
+                if (isFolder || items.length > 0) {
                     nestedUl = document.createElement('ul');
 
-                    // Render child categories (folders)
                     if (isFolder) {
                         renderTreeNode(nodeValue, nestedUl);
                     }
 
-                    // Render real items (URLs) directly under this category
-                    items.filter(item => !item.id.startsWith(DUMMY_ITEM_PREFIX)) // Exclude dummies from rendering
+                    items.filter(item => !item.id.startsWith(DUMMY_ITEM_PREFIX))
                          .sort((a, b) => a.url.localeCompare(b.url))
                          .forEach(entry => {
                             const urlLi = document.createElement('li');
@@ -1171,7 +1205,6 @@
                         });
                      li.appendChild(nestedUl);
 
-                     // --- Toggle Functionality ---
                      if (toggleIcon.classList.contains('toggle-icon')) {
                          toggleIcon.addEventListener('click', (e) => {
                              e.stopPropagation();
@@ -1182,9 +1215,6 @@
                                  isHidden ? 'fa-chevron-down' : 'fa-chevron-right'
                              );
                          });
-                     } else {
-                         // If no toggle icon, ensure children are visible by default (shouldn't happen often)
-                         if (nestedUl) nestedUl.style.display = 'block';
                      }
                  }
                  parentUl.appendChild(li);
@@ -1192,22 +1222,20 @@
         }
 
 
-        // --- Rename Category Logic ---
-
-        function showRenameInput(renameIcon) { /* ... no changes ... */
-            const headerDiv = renameIcon.closest('.category-label');
+        // --- Rename, Drag/Drop, Create Folder Logic ---
+        // ... (showRenameInput, handleRenameSave, handleRenameCancel remain the same) ...
+         function showRenameInput(renameIcon) { /* ... no changes ... */
+             const headerDiv = renameIcon.closest('.category-label');
             const labelSpan = headerDiv.querySelector('.label-text');
-            const actionsContainer = headerDiv.querySelector('.category-actions'); // Target actions container
+            const actionsContainer = headerDiv.querySelector('.category-actions');
             const oldName = renameIcon.dataset.categoryName;
 
             if (headerDiv.querySelector('.rename-controls')) return;
 
-            // Hide label span and actions container
             labelSpan.classList.add('hidden');
-            if (actionsContainer) actionsContainer.classList.add('hidden'); // Hide all actions
+            if (actionsContainer) actionsContainer.classList.add('hidden');
 
-            // Create input field
-            const input = document.createElement('input'); /* ... */
+            const input = document.createElement('input');
             input.type = 'text';
             input.value = oldName;
             input.classList.add('rename-input');
@@ -1216,14 +1244,13 @@
                 else if (e.key === 'Escape') { handleRenameCancel(input); }
             });
 
-            // Create Save/Cancel buttons
-            const saveBtn = document.createElement('button'); /* ... */
+            const saveBtn = document.createElement('button');
             saveBtn.classList.add('action-button', 'save-rename');
             saveBtn.innerHTML = '<i class="fas fa-check"></i>';
             saveBtn.title = 'Save new name';
             saveBtn.addEventListener('click', () => handleRenameSave(input));
 
-            const cancelBtn = document.createElement('button'); /* ... */
+            const cancelBtn = document.createElement('button');
             cancelBtn.classList.add('action-button', 'cancel-rename');
             cancelBtn.innerHTML = '<i class="fas fa-times"></i>';
             cancelBtn.title = 'Cancel rename';
@@ -1235,63 +1262,57 @@
             controls.appendChild(saveBtn);
             controls.appendChild(cancelBtn);
 
-            // Insert controls before the hidden label span
             headerDiv.insertBefore(controls, labelSpan);
             input.focus();
             input.select();
-        }
-
-        function handleRenameSave(inputElement) { /* ... uses fullHierarchyPath now ... */
-            const controlsDiv = inputElement.closest('.rename-controls');
+         }
+         function handleRenameSave(inputElement) { /* ... no changes ... */
+             const controlsDiv = inputElement.closest('.rename-controls');
             if (!controlsDiv) return;
             const headerDiv = controlsDiv.closest('.category-label');
-            const actionsContainer = headerDiv.querySelector('.category-actions'); // Find original actions
-            const renameIcon = actionsContainer?.querySelector('.rename-icon'); // Find icon within actions
-             if (!renameIcon) { // Should not happen if UI is correct
+            const actionsContainer = headerDiv.querySelector('.category-actions');
+            const renameIcon = actionsContainer?.querySelector('.rename-icon');
+             if (!renameIcon) {
                  console.error("Could not find original rename icon data.");
-                 handleRenameCancel(inputElement); // Attempt to restore UI
+                 handleRenameCancel(inputElement);
                  return;
              }
 
             const oldName = renameIcon.dataset.categoryName;
-            const fullHierarchyPathString = renameIcon.dataset.fullHierarchyPath; // Uses meta path
+            const fullHierarchyPathString = renameIcon.dataset.fullHierarchyPath;
             const newName = inputElement.value.trim();
 
             if (newName && newName !== oldName) {
                  try {
                      const fullHierarchyPath = JSON.parse(fullHierarchyPathString);
-                     if (renameCategoryInData(fullHierarchyPath, oldName, newName)) { // Call updated function
+                     if (renameCategoryInData(fullHierarchyPath, oldName, newName)) {
                         console.log(`Renamed category based on path [${fullHierarchyPath.join('/')}] to "${newName}"`);
                         const treeData = buildUrlTree(classificationHistory);
-                        renderTree(treeData, urlTreeContainer); // Re-render handles UI cleanup
+                        renderTree(treeData, urlTreeContainer);
                      } else {
                         console.error("Rename function reported no changes made.");
-                        handleRenameCancel(inputElement); // Restore UI if data update failed
+                        handleRenameCancel(inputElement);
                      }
                  } catch (e) {
                      console.error("Error parsing path or renaming:", e);
                      handleRenameCancel(inputElement);
                  }
             } else {
-                handleRenameCancel(inputElement); // Treat no change or empty name as cancel
+                handleRenameCancel(inputElement);
             }
-        }
-
-        function handleRenameCancel(inputElement) { /* ... ensures actions container is shown ... */
-            const controlsDiv = inputElement.closest('.rename-controls');
+         }
+         function handleRenameCancel(inputElement) { /* ... no changes ... */
+             const controlsDiv = inputElement.closest('.rename-controls');
              if (!controlsDiv) return;
             const headerDiv = controlsDiv.closest('.category-label');
             const labelSpan = headerDiv.querySelector('.label-text');
-            const actionsContainer = headerDiv.querySelector('.category-actions'); // Find actions container
+            const actionsContainer = headerDiv.querySelector('.category-actions');
 
             controlsDiv.remove();
             labelSpan.classList.remove('hidden');
-             if (actionsContainer) actionsContainer.classList.remove('hidden'); // Show actions again
-        }
-
-        // --- Rename Category Data Logic (REVISED) ---
-        // Uses the full hierarchy path from the node's meta data.
-        function renameCategoryInData(fullHierarchyPath, oldName, newName) {
+             if (actionsContainer) actionsContainer.classList.remove('hidden');
+         }
+        function renameCategoryInData(fullHierarchyPath, oldName, newName) { /* ... no changes needed from previous version... */
              if (!fullHierarchyPath || fullHierarchyPath.length === 0 || !oldName || !newName || oldName === newName) {
                  console.warn("Rename aborted: Invalid parameters.");
                  return false;
@@ -1299,16 +1320,11 @@
 
              let changesMade = false;
              const targetUrlType = fullHierarchyPath[0];
-             // Determine the index within the item's *actual* hierarchy array that needs changing.
-             // This depends on whether the format was skipped visually.
-             // The last element in fullHierarchyPath IS the oldName we are looking for.
              const hierarchyRenameIndex = fullHierarchyPath.length - 2; // Index relative to start of item's hierarchy array
 
 
              classificationHistory.forEach(item => {
-                 // Skip dummy items, they don't need renaming (and might lack full classification)
                  if (item.id.startsWith(DUMMY_ITEM_PREFIX)) return;
-
                  const classification = get(item, 'classification.classification');
                  if (!classification) return;
 
@@ -1317,30 +1333,22 @@
                                        ? [...classification.content_type_hierarchy] // Copy
                                        : ['Unknown Category'];
 
-
-                 // 1. Check if URL Type matches
                  if (itemUrlType === targetUrlType) {
-                     // 2. Check if the item's hierarchy is long enough for the target level
                      if (itemHierarchy.length > hierarchyRenameIndex) {
-                         // 3. Check if the segment *at the target level* matches the oldName
                          if (itemHierarchy[hierarchyRenameIndex] === oldName) {
-                            // 4. Verify the prefix *before* the target level also matches the provided path
-                            // (This ensures we're renaming the correct folder if names are duplicated at different levels)
                              let prefixMatch = true;
-                             // Compare itemHierarchy[0...hierarchyRenameIndex-1] with fullHierarchyPath[1...hierarchyRenameIndex]
                              for (let i = 0; i < hierarchyRenameIndex; i++) {
+                                 // Check item hierarchy part against the corresponding part in the *full* path (offset by 1)
                                  if (itemHierarchy[i] !== fullHierarchyPath[i + 1]) {
                                      prefixMatch = false;
                                      break;
                                  }
                              }
-
                              if (prefixMatch) {
-                                 // All checks pass, rename the segment
                                  itemHierarchy[hierarchyRenameIndex] = newName;
-                                 classification.content_type_hierarchy = itemHierarchy;
+                                 // IMPORTANT: Update the actual object in classificationHistory
+                                 item.classification.classification.content_type_hierarchy = itemHierarchy;
                                  changesMade = true;
-                                 // console.log(`Updated item ${item.id}: hierarchy changed`);
                              }
                          }
                      }
@@ -1348,19 +1356,15 @@
              });
 
              if (changesMade) {
-                 saveHistory();
+                 // No need to save here, saveHistory() is called after addHistoryEntry finishes
              } else {
                   console.warn("Rename function executed, but no matching history entries found/modified for path:", fullHierarchyPath);
              }
-             return changesMade;
+             return changesMade; // Return status
         }
 
-
-         // --- Drag and Drop Logic ---
-
-         function moveHistoryEntry(entryId, targetUrlType, targetFormat, targetHierarchyArray) {
-            // Ensure targetHierarchyArray is actually an array
-            if (!Array.isArray(targetHierarchyArray)) {
+        function moveHistoryEntry(entryId, targetUrlType, targetFormat, targetHierarchyArray) { /* ... no changes ... */
+             if (!Array.isArray(targetHierarchyArray)) {
                 console.error("Cannot move entry: targetHierarchy is not an array.", targetHierarchyArray);
                 return false;
             }
@@ -1372,43 +1376,35 @@
              }
 
              const entry = classificationHistory[entryIndex];
-             const classification = get(entry, 'classification.classification');
+             let classification = get(entry, 'classification.classification'); // Use let
 
              if (!classification) {
                  console.warn(`Creating classification structure for moved entry: ID ${entryId}.`);
-                 // Ensure the structure exists if moving an item that somehow lacked it
                   if (!entry.classification) entry.classification = {};
                   if (!entry.classification.classification) entry.classification.classification = {};
-                  classification = entry.classification.classification;
+                  classification = entry.classification.classification; // Reassign
              }
 
-             // Extract just the hierarchy *parts* from the target array (remove urlType/format if present)
-             // The targetHierarchyArray from meta *includes* urlType and potentially format.
              let actualTargetHierarchy = [];
-             const targetHierarchyStart = targetHierarchyArray.indexOf(targetUrlType) + 1; // Start after urlType
-             if (targetHierarchyStart > 0 && targetHierarchyStart < targetHierarchyArray.length) {
-                // Check if the next element is the format (and not the same as urlType)
-                 const potentialFormat = targetHierarchyArray[targetHierarchyStart];
-                 if (potentialFormat === targetFormat && targetFormat !== targetUrlType) {
-                     actualTargetHierarchy = targetHierarchyArray.slice(targetHierarchyStart + 1);
-                 } else {
-                      actualTargetHierarchy = targetHierarchyArray.slice(targetHierarchyStart);
-                 }
+             // Find the starting index of the actual hierarchy parts within the meta path
+             let hierarchyStartIndex = 1; // Start after urlType
+             if (targetHierarchyArray.length > 1 && targetHierarchyArray[1] === targetFormat && targetFormat !== targetUrlType) {
+                hierarchyStartIndex = 2; // Skip format as well
              }
+             actualTargetHierarchy = targetHierarchyArray.slice(hierarchyStartIndex);
 
-             // Update the classification data
+
              classification.url_type = targetUrlType;
              classification.content_format = targetFormat;
-             classification.content_type_hierarchy = actualTargetHierarchy; // Assign the extracted hierarchy parts
+             classification.content_type_hierarchy = actualTargetHierarchy;
 
              console.log(`Moved entry ${entryId} to [${targetUrlType}/${targetFormat}]/[${actualTargetHierarchy.join('/')}]`);
-             saveHistory();
+             // No save needed here, will be saved after addHistoryEntry finishes or by caller if used elsewhere
              return true;
-         }
+        }
 
-         // --- Create Folder Logic ---
-         function handleCreateFolder(createIcon) {
-            const parentUrlType = createIcon.dataset.parentUrlType;
+        function handleCreateFolder(createIcon) { /* ... no changes ... */
+             const parentUrlType = createIcon.dataset.parentUrlType;
             const parentFormat = createIcon.dataset.parentFormat;
             const parentHierarchyString = createIcon.dataset.parentHierarchy;
 
@@ -1422,37 +1418,27 @@
              if (newFolderName && newFolderName.trim()) {
                  const trimmedName = newFolderName.trim();
                  try {
-                     const parentHierarchy = JSON.parse(parentHierarchyString);
+                     const parentHierarchyMetaPath = JSON.parse(parentHierarchyString);
 
-                     // Extract the actual hierarchy *parts* from the parent's full path meta
                      let parentHierarchyParts = [];
-                     const parentHierarchyStart = parentHierarchy.indexOf(parentUrlType) + 1;
-                     if (parentHierarchyStart > 0 && parentHierarchyStart < parentHierarchy.length) {
-                         const potentialFormat = parentHierarchy[parentHierarchyStart];
-                         if (potentialFormat === parentFormat && parentFormat !== parentUrlType) {
-                             parentHierarchyParts = parentHierarchy.slice(parentHierarchyStart + 1);
-                         } else {
-                              parentHierarchyParts = parentHierarchy.slice(parentHierarchyStart);
-                         }
-                     } else if (parentHierarchyStart === parentHierarchy.length) {
-                          // Parent was just the urlType node
-                           parentHierarchyParts = [];
+                     let hierarchyStartIndex = 1;
+                     if (parentHierarchyMetaPath.length > 1 && parentHierarchyMetaPath[1] === parentFormat && parentFormat !== parentUrlType) {
+                         hierarchyStartIndex = 2;
                      }
+                     parentHierarchyParts = parentHierarchyMetaPath.slice(hierarchyStartIndex);
 
 
-                     // Create the new hierarchy by appending the new name
                      const newHierarchy = [...parentHierarchyParts, trimmedName];
 
-                     // Create dummy entry
                      const dummyEntry = {
-                         id: generateId(true), // Mark as dummy
-                         url: `${DUMMY_ITEM_PREFIX}${trimmedName}/${generateId()}`, // Unique placeholder URL
+                         id: generateId(true),
+                         url: `${DUMMY_ITEM_PREFIX}${trimmedName}/${generateId()}`,
                          classification: {
                              classification: {
                                  url_type: parentUrlType,
                                  content_format: parentFormat,
                                  content_type_hierarchy: newHierarchy,
-                                 primary_language: "Undetermined", // Default
+                                 primary_language: "Undetermined",
                                  keywords: [],
                                  confidence: "Low"
                              }
@@ -1460,10 +1446,9 @@
                      };
 
                      console.log("Creating dummy entry:", dummyEntry);
-                     classificationHistory.push(dummyEntry); // Add to history (push to end is fine)
+                     classificationHistory.push(dummyEntry);
                      saveHistory();
 
-                     // Re-render the tree to show the new folder
                      const treeData = buildUrlTree(classificationHistory);
                      renderTree(treeData, urlTreeContainer);
 
@@ -1471,10 +1456,199 @@
                      console.error("Error parsing parent hierarchy or creating folder:", e);
                      alert("Failed to create folder due to an internal error.");
                  }
-             } else if (newFolderName !== null) { // User entered empty string or only whitespace
+             } else if (newFolderName !== null) {
                   alert("Folder name cannot be empty.");
              }
-             // If prompt returns null (Cancel), do nothing.
+        }
+
+
+         // --- NEW: Path Optimization & Subcategorization Logic ---
+
+         // Helper: Compare two hierarchy arrays, return length of common prefix
+         function getCommonPrefixLength(h1, h2) {
+             let len = 0;
+             const maxLen = Math.min(h1.length, h2.length);
+             for (let i = 0; i < maxLen; i++) {
+                 if (h1[i] === h2[i]) {
+                     len++;
+                 } else {
+                     break;
+                 }
+             }
+             return len;
+         }
+
+         // Determines the best path to store the new item under
+         function determineOptimalPath(proposedClassification, history) {
+             const pUrlType = proposedClassification.url_type || 'Unknown Type';
+             const pFormat = proposedClassification.content_format || 'Unknown Format';
+             // Ensure hierarchy is always an array, handle potential null/undefined
+             const pHierarchy = Array.isArray(proposedClassification.content_type_hierarchy) ? proposedClassification.content_type_hierarchy : ['Unknown Category'];
+
+             let bestMatch = { urlType: pUrlType, format: pFormat, hierarchy: [...pHierarchy], score: -1 };
+             let perfectMatchFound = false;
+
+             const nonDummyHistory = history.filter(item => !item.id.startsWith(DUMMY_ITEM_PREFIX));
+
+             for (const item of nonDummyHistory) {
+                 const existingClassification = get(item, 'classification.classification');
+                 if (!existingClassification) continue;
+
+                 const eUrlType = existingClassification.url_type || 'Unknown Type';
+                 const eFormat = existingClassification.content_format || 'Unknown Format';
+                 const eHierarchy = Array.isArray(existingClassification.content_type_hierarchy) ? existingClassification.content_type_hierarchy : ['Unknown Category'];
+
+                 let currentScore = 0;
+                 let commonPrefixLen = 0;
+
+                 if (eUrlType === pUrlType) {
+                     currentScore += 1; // Base score for matching type
+                     if (eFormat === pFormat) {
+                         currentScore += 1; // Bonus for matching format
+                         commonPrefixLen = getCommonPrefixLength(eHierarchy, pHierarchy);
+                         currentScore += commonPrefixLen; // Add length of common hierarchy
+                     }
+                     // else: Only URL type matched, hierarchy doesn't matter for scoring here
+
+                     // Check for perfect match
+                     if (eFormat === pFormat && eHierarchy.length === pHierarchy.length && commonPrefixLen === pHierarchy.length) {
+                         console.log("Found perfect path match:", { urlType: eUrlType, format: eFormat, hierarchy: eHierarchy });
+                         perfectMatchFound = true;
+                         bestMatch = { urlType: eUrlType, format: eFormat, hierarchy: [...eHierarchy], score: Infinity }; // Ensure perfect match wins
+                         break; // No need to check further
+                     }
+
+                     // Update best partial match if current score is higher
+                     if (currentScore > bestMatch.score) {
+                         bestMatch = {
+                             urlType: eUrlType,
+                             format: eFormat,
+                             // Store the *existing* hierarchy that gave the best score
+                             hierarchy: [...eHierarchy],
+                             score: currentScore,
+                             // Also store the common prefix length with the *proposed* hierarchy for later use
+                             commonPrefixLen: commonPrefixLen
+                         };
+                     }
+                 }
+             } // End history loop
+
+             // --- Decide final path ---
+             if (perfectMatchFound) {
+                 return { urlType: bestMatch.urlType, format: bestMatch.format, hierarchy: bestMatch.hierarchy };
+             } else if (bestMatch.score >= 2) { // Require at least type+format or type+some_hierarchy match
+                 // Construct path: common prefix from best match + remaining from proposed
+                 const commonPrefix = bestMatch.hierarchy.slice(0, bestMatch.commonPrefixLen);
+                 const remainingProposed = pHierarchy.slice(bestMatch.commonPrefixLen);
+                 const finalHierarchy = [...commonPrefix, ...remainingProposed];
+                 console.log("Using partial match. Common:", commonPrefix, "Remaining proposed:", remainingProposed);
+                 // Ensure format matches the common prefix part
+                 const finalFormat = bestMatch.format;
+                 return { urlType: bestMatch.urlType, format: finalFormat, hierarchy: finalHierarchy };
+             } else {
+                 // No good match, use original proposed path
+                 console.log("No suitable existing path found, using proposed path.");
+                 return { urlType: pUrlType, format: pFormat, hierarchy: pHierarchy };
+             }
+         }
+
+
+         // Checks if subcategorization is needed and performs it by modifying history directly
+         // Returns the potentially updated hierarchy for the *new* item being added.
+         function checkAndSubcategorizeIfNeeded(targetPath, history, newItemKeywords) {
+             const { urlType, format, hierarchy } = targetPath;
+             let finalHierarchy = [...hierarchy]; // Start with the target hierarchy
+
+             // Find existing items matching the target path *exactly*
+             const matchingItemsIndices = []; // Store indices for direct modification
+             const matchingItemsKeywords = [];
+
+             history.forEach((item, index) => {
+                  // Skip dummies and the item being added (if it somehow got into history early)
+                  if (item.id.startsWith(DUMMY_ITEM_PREFIX)) return;
+
+                 const itemClass = get(item, 'classification.classification');
+                 if (itemClass &&
+                     (itemClass.url_type || 'Unknown Type') === urlType &&
+                     (itemClass.content_format || 'Unknown Format') === format &&
+                     Array.isArray(itemClass.content_type_hierarchy) &&
+                     itemClass.content_type_hierarchy.length === hierarchy.length &&
+                     itemClass.content_type_hierarchy.every((h, i) => h === hierarchy[i]))
+                 {
+                     matchingItemsIndices.push(index);
+                     matchingItemsKeywords.push(...(itemClass.keywords || []));
+                 }
+             });
+
+             const currentCount = matchingItemsIndices.length;
+             const totalCount = currentCount + 1; // Including the new item
+
+             console.log(`Checking subcategorization for path [${urlType}/${format}]/[${hierarchy.join('/')}]: ${currentCount} existing + 1 new = ${totalCount}. Threshold: ${MAX_ITEMS_PER_CATEGORY}`);
+
+             if (totalCount >= MAX_ITEMS_PER_CATEGORY) {
+                 console.log("Threshold met, attempting subcategorization...");
+                 const allKeywords = [...matchingItemsKeywords, ...newItemKeywords];
+                 const keywordCounts = {};
+
+                 // Count keyword frequencies, filter stop words, normalize
+                 allKeywords.forEach(kw => {
+                     if (typeof kw === 'string') {
+                        const cleanedKw = kw.trim().toLowerCase();
+                        if (cleanedKw.length >= MIN_KEYWORD_LENGTH && !STOP_WORDS.has(cleanedKw)) {
+                            keywordCounts[cleanedKw] = (keywordCounts[cleanedKw] || 0) + 1;
+                        }
+                     }
+                 });
+
+                 // Find the most frequent keyword
+                 let bestKeyword = null;
+                 let maxCount = 0;
+                 for (const [kw, count] of Object.entries(keywordCounts)) {
+                     // Prefer keywords that appear more than once, or at least cover a good portion
+                     if (count > maxCount && count > 1) { // Stricter: require keyword to be shared
+                         maxCount = count;
+                         bestKeyword = kw;
+                     }
+                 }
+
+                 // Fallback: If no keyword repeats, maybe take the most frequent single one? (Less ideal)
+                 if (!bestKeyword && Object.keys(keywordCounts).length > 0) {
+                     // Find max count even if it's 1
+                      for (const [kw, count] of Object.entries(keywordCounts)) {
+                         if (count > maxCount) {
+                             maxCount = count;
+                             bestKeyword = kw;
+                         }
+                      }
+                 }
+
+
+                 if (bestKeyword) {
+                     // Capitalize keyword for folder name
+                     const subCategoryName = bestKeyword.charAt(0).toUpperCase() + bestKeyword.slice(1);
+                     const newHierarchy = [...hierarchy, subCategoryName];
+                     console.log(`Found subcategory keyword: "${subCategoryName}". New hierarchy:`, newHierarchy);
+
+                     // IMPORTANT: Modify existing items IN PLACE in classificationHistory
+                     matchingItemsIndices.forEach(index => {
+                         const itemToModify = classificationHistory[index];
+                         if (itemToModify && itemToModify.classification && itemToModify.classification.classification) {
+                             itemToModify.classification.classification.content_type_hierarchy = [...newHierarchy]; // Assign copy
+                             console.log(`Updated existing item ${itemToModify.id} to new subcategory.`);
+                         }
+                     });
+
+                     // Return the new hierarchy for the item being added
+                     finalHierarchy = newHierarchy;
+                 } else {
+                     console.log("Could not determine a suitable keyword for subcategorization.");
+                     // Return original hierarchy if no keyword found
+                     finalHierarchy = hierarchy;
+                 }
+             }
+
+             // Return the final hierarchy (either original or with the new subcategory)
+             return finalHierarchy;
          }
 
 
@@ -1500,13 +1674,16 @@
         }
 
         // --- Main Classification Function ---
-        async function classifyUrlContent() { /* ... no changes ... */
+        async function classifyUrlContent() {
             const pageUrl = urlInput.value.trim();
             if (!pageUrl || !/^https?:\/\/.+/.test(pageUrl)) {
-                displayResultInArea(classifierResultDisplay, "Please enter a valid URL (starting with http:// or https://).", true);
+                displayResultInArea(classifierResultDisplay, "Please enter a valid URL (starting with http:// or https://).", true, "Input Error");
                 return;
             }
             showLoading(true);
+            // Display "pending" message immediately
+             displayResultInArea(classifierResultDisplay, `Requesting classification for ${pageUrl}...`, false, "API Request Pending");
+
             try {
                 const response = await fetch(NETLIFY_FUNCTION_ENDPOINT, {
                     method: 'POST',
@@ -1520,7 +1697,9 @@
                 }
 
                 if (data.classification && typeof data.classification === 'object' && data.classification.classification) {
-                    displayResultInArea(classifierResultDisplay, data.classification, false, 'API Result');
+                    // Display the RAW result first
+                    displayResultInArea(classifierResultDisplay, data.classification, false, 'API Result (Raw)');
+                    // Now add it using the new logic
                     addHistoryEntry(pageUrl, data.classification);
                 } else {
                      console.warn("Received unexpected response format:", data);
@@ -1528,7 +1707,7 @@
                 }
             } catch (error) {
                 console.error("Error during classification:", error);
-                displayResultInArea(classifierResultDisplay, `Classification failed: ${error.message}`, true);
+                displayResultInArea(classifierResultDisplay, `Classification failed: ${error.message}`, true, "Classification Error");
             } finally {
                 showLoading(false);
             }
@@ -1552,65 +1731,55 @@
             showAllButton.addEventListener('click', showAllHistory);
 
             // --- Event delegation for tree actions ---
-            urlTreeContainer.addEventListener('click', (event) => {
-                 // Handle Rename Icon Clicks
+            urlTreeContainer.addEventListener('click', (event) => { /* ... no changes ... */
                  const renameIcon = event.target.closest('.rename-icon');
                  if (renameIcon) {
                       event.stopPropagation();
                       showRenameInput(renameIcon);
-                      return; // Processed
+                      return;
                  }
-                 // Handle Create Folder Icon Clicks
                   const createFolderIcon = event.target.closest('.create-folder-icon');
                   if (createFolderIcon) {
                       event.stopPropagation();
                       handleCreateFolder(createFolderIcon);
-                      return; // Processed
+                      return;
                   }
-
-                 // Note: Delete handled directly on button, Toggle handled directly on icon
             });
 
             // --- Drag and Drop Event Listeners (Delegated) ---
             urlTreeContainer.addEventListener('dragstart', (event) => { /* ... no changes ... */
-                const targetLi = event.target.closest('li.url-link');
+                 const targetLi = event.target.closest('li.url-link');
                 if (targetLi && targetLi.draggable) {
                     draggedElement = targetLi;
                     const entryId = targetLi.dataset.entryId;
                     event.dataTransfer.setData(DRAG_DATA_TYPE, entryId);
                     event.dataTransfer.effectAllowed = 'move';
                     setTimeout(() => { targetLi.classList.add('dragging'); }, 0);
-                    // console.log(`Drag Start: Entry ID ${entryId}`);
                 }
             });
-
             urlTreeContainer.addEventListener('dragend', (event) => { /* ... no changes ... */
                  if (draggedElement) {
                      draggedElement.classList.remove('dragging');
                      draggedElement = null;
                      document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-                     // console.log("Drag End");
                  }
             });
-
             urlTreeContainer.addEventListener('dragover', (event) => { /* ... no changes ... */
-                 const dropTarget = event.target.closest('.category-label');
+                const dropTarget = event.target.closest('.category-label');
                 if (dropTarget && draggedElement) {
                     event.preventDefault();
                     event.dataTransfer.dropEffect = 'move';
                     dropTarget.classList.add('drag-over');
                 }
             });
-
              urlTreeContainer.addEventListener('dragleave', (event) => { /* ... no changes ... */
                  const dropTarget = event.target.closest('.category-label');
                  if (dropTarget) {
                     dropTarget.classList.remove('drag-over');
                  }
             });
-
-             urlTreeContainer.addEventListener('drop', (event) => { /* ... uses hierarchy array now ... */
-                event.preventDefault();
+             urlTreeContainer.addEventListener('drop', (event) => { /* ... no changes ... */
+                 event.preventDefault();
                 const dropTarget = event.target.closest('.category-label');
                  if (dropTarget && draggedElement) {
                      dropTarget.classList.remove('drag-over');
@@ -1618,15 +1787,17 @@
                      const entryId = event.dataTransfer.getData(DRAG_DATA_TYPE);
                      const targetUrlType = dropTarget.dataset.targetUrlType;
                      const targetFormat = dropTarget.dataset.targetFormat;
-                     const targetHierarchyString = dropTarget.dataset.targetHierarchy; // Get the full path string
+                     const targetHierarchyString = dropTarget.dataset.targetHierarchy;
 
-                     console.log(`Drop: Entry ID ${entryId} onto Category Meta [${targetHierarchyString}]`);
+                     // console.log(`Drop: Entry ID ${entryId} onto Category Meta [${targetHierarchyString}]`);
 
                      if (entryId && targetUrlType && targetFormat && targetHierarchyString) {
                           try {
-                              const targetHierarchyArray = JSON.parse(targetHierarchyString); // Parse the full path
+                              const targetHierarchyArray = JSON.parse(targetHierarchyString);
 
-                              if (moveHistoryEntry(entryId, targetUrlType, targetFormat, targetHierarchyArray)) { // Pass the full array
+                              if (moveHistoryEntry(entryId, targetUrlType, targetFormat, targetHierarchyArray)) {
+                                  // Save history AFTER successful move
+                                  saveHistory();
                                   const treeData = buildUrlTree(classificationHistory);
                                   renderTree(treeData, urlTreeContainer);
                               } else {
