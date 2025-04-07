@@ -4,185 +4,627 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Page Classifier & History</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* --- Previous CSS (Reset, Font, Wrapper, Tabs, Page Content, Forms, Buttons, Loader, Results, Info) --- */
-        /* Basic Reset & Font */
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { height: 100%; }
+        /* --- Base Styles --- */
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #dbeafe;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --neutral-50: #f9fafb;
+            --neutral-100: #f3f4f6;
+            --neutral-200: #e5e7eb;
+            --neutral-300: #d1d5db;
+            --neutral-400: #9ca3af;
+            --neutral-500: #6b7280;
+            --neutral-600: #4b5563;
+            --neutral-700: #374151;
+            --neutral-800: #1f2937;
+            --neutral-900: #111827;
+            --info-light: #dbeafe;
+            --info-dark: #1e3a8a;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            --radius-sm: 0.25rem;
+            --radius: 0.5rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+        }
+
+        html, body { 
+            height: 100%; 
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6; background-color: #f0f2f5; color: #333;
+            line-height: 1.6; 
+            background-color: var(--neutral-100); 
+            color: var(--neutral-800);
             padding: 20px;
+            font-size: 16px;
         }
-        .main-wrapper {
-            background-color: #ffffff; padding: 0; border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); width: 100%; max-width: 900px;
-             margin: 0 auto; overflow: hidden;
-        }
-        /* Tab Styles */
-        .tab-container { display: flex; background-color: #e9ecef; border-bottom: 1px solid #dee2e6; }
-        .tab-button {
-            padding: 12px 20px; cursor: pointer; border: none; background-color: transparent;
-            font-size: 1rem; font-weight: 500; color: #495057; transition: background-color 0.2s ease, color 0.2s ease;
-            border-bottom: 3px solid transparent; margin-bottom: -1px;
-        }
-        .tab-button:hover { background-color: #f8f9fa; color: #0056b3; }
-        .tab-button.active { color: #0056b3; background-color: #ffffff; border-bottom: 3px solid #1a73e8; }
-        /* Page Content Styles */
-        .page-content { display: none; padding: 30px; }
-        .page-content.active { display: block; }
-        /* Element Styles */
-        h1, h2 { color: #1a73e8; margin-bottom: 20px; font-weight: 500; }
-        h1 { text-align: center; font-size: 1.8em; padding-top: 20px;}
-        h2 { font-size: 1.3em; margin-bottom: 15px; text-align: left; }
-        .form-group { margin-bottom: 20px; text-align: left; }
-        label { display: block; margin-bottom: 8px; font-weight: 500; color: #555; }
-        input[type="url"] {
-            width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px;
-            font-size: 1rem; font-family: inherit;
-        }
-        input[type="url"]:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2); }
-        button {
-            background-color: #1a73e8; color: white; border: none; padding: 12px 25px;
-            border-radius: 5px; font-size: 1rem; cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.1s ease; margin-top: 10px;
-        }
-        button#classifyButton { display: inline-flex; align-items: center; justify-content: center; min-width: 150px; width: 100%; }
-        button:hover { background-color: #155ab6; }
-        button:active { transform: scale(0.98); }
-        button:disabled { background-color: #cccccc; cursor: not-allowed; }
-        .loader {
-            border: 4px solid #f3f3f3; border-top: 4px solid #1a73e8; border-radius: 50%;
-            width: 20px; height: 20px; animation: spin 1s linear infinite;
-            margin-right: 10px; display: none;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        /* Result Display Styles */
-        .result-display-area {
-            margin-top: 30px; padding: 20px; background-color: #e9f2ff;
-            border-radius: 8px; border: 1px solid #c6dfff; text-align: left;
-            word-wrap: break-word; display: none; font-size: 0.95em; min-height: 100px;
-        }
-        .result-display-area.error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
-        .result-display-area strong.title { display: block; margin-bottom: 10px; color: #1a73e8; font-weight: 600; font-size: 1.1em; }
-        .result-display-area.error strong.title { color: #721c24; }
-        .result-display-area pre {
-            background-color: #f8f9fa; padding: 15px; border-radius: 5px;
-            border: 1px solid #dee2e6; font-family: monospace; white-space: pre-wrap;
-            word-break: break-all; font-size: 0.9em; margin: 0; color: #212529;
-        }
-        .result-display-area.error pre { color: #721c24; background-color: transparent; border: none; padding: 0; white-space: pre-wrap; font-family: inherit; font-size: 1em; }
-        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: left; font-size: 0.9em; }
-        /* History List Specific Styles */
-        #historyList { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; border: 1px solid #eee; border-radius: 5px; margin-bottom: 15px; }
-        #historyList li { padding: 10px 12px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 0.9em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background-color 0.2s ease; }
-        #historyList li:last-child { border-bottom: none; }
-        #historyList li:hover { background-color: #f0f2f5; }
-        #historyList li.selected { background-color: #e0eaff; font-weight: 500; }
-        #historyList li:empty::after { content: "No history yet."; font-style: italic; color: #888; display: block; text-align: center; padding: 20px; }
-        /* History Page Buttons */
-        .history-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 15px; }
-        .history-actions button { margin-top: 0; padding: 8px 15px; font-size: 0.9em; flex-shrink: 0; }
-        #showAllButton { background-color: #28a745; }
-        #showAllButton:hover { background-color: #218838; }
-        #clearHistoryButton { background-color: #dc3545; }
-        #clearHistoryButton:hover { background-color: #c82333; }
 
-        /* --- NEW: URL Tree Styles --- */
-        #urlTreeContainer {
-            font-size: 0.95em;
-             border: 1px solid #eee; /* Optional border */
-             padding: 15px;
-             border-radius: 5px;
-             max-height: 500px; /* Limit height */
-             overflow: auto; /* Add scrollbars if needed */
+        .main-wrapper {
+            background-color: #ffffff; 
+            padding: 0; 
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            width: 100%; 
+            max-width: 900px;
+            margin: 0 auto; 
+            overflow: hidden;
+            position: relative;
+            transition: box-shadow 0.3s ease;
         }
+
+        .main-wrapper:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* --- Header --- */
+        h1 {
+            text-align: center; 
+            font-size: 1.8em; 
+            padding: 1.5rem 0;
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 0;
+            background-color: white;
+            border-bottom: 1px solid var(--neutral-200);
+        }
+
+        h2 { 
+            font-size: 1.3em; 
+            margin-bottom: 1rem; 
+            text-align: left; 
+            color: var(--neutral-800);
+            font-weight: 600;
+        }
+
+        /* --- Tab Navigation --- */
+        .tab-container { 
+            display: flex; 
+            background-color: white; 
+            border-bottom: 1px solid var(--neutral-200); 
+            padding: 0 1rem;
+        }
+
+        .tab-button {
+            padding: 1rem 1.25rem;
+            cursor: pointer; 
+            border: none; 
+            background-color: transparent;
+            font-size: 1rem; 
+            font-weight: 500; 
+            color: var(--neutral-600); 
+            transition: all 0.2s ease;
+            border-bottom: 3px solid transparent; 
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-button:hover { 
+            color: var(--primary); 
+            background-color: var(--neutral-50);
+        }
+
+        .tab-button.active { 
+            color: var(--primary); 
+            border-bottom: 3px solid var(--primary); 
+        }
+
+        .tab-button.active::after {
+            content: "";
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background-color: var(--primary);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .tab-button i {
+            font-size: 0.9rem;
+        }
+
+        /* --- Page Content --- */
+        .page-content { 
+            display: none; 
+            padding: 2rem; 
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page-content.active { 
+            display: block; 
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Form Elements --- */
+        .form-group { 
+            margin-bottom: 1.5rem; 
+            text-align: left; 
+        }
+
+        label { 
+            display: block; 
+            margin-bottom: 0.5rem; 
+            font-weight: 500; 
+            color: var(--neutral-700); 
+            font-size: 0.95rem;
+        }
+
+        input[type="url"] {
+            width: 100%; 
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--neutral-300); 
+            border-radius: var(--radius);
+            font-size: 1rem; 
+            font-family: inherit;
+            transition: all 0.2s ease;
+            background-color: white;
+        }
+
+        input[type="url"]:focus { 
+            outline: none; 
+            border-color: var(--primary); 
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        input[type="url"]::placeholder {
+            color: var(--neutral-400);
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white; 
+            border: none; 
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius);
+            font-size: 1rem; 
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        button:hover { 
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        button:active { 
+            transform: translateY(0); 
+        }
+
+        button:disabled { 
+            background-color: var(--neutral-400); 
+            cursor: not-allowed; 
+            transform: none;
+        }
+
+        button#classifyButton { 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            min-width: 150px; 
+            width: 100%; 
+        }
+
+        /* --- Loader --- */
+        .loader {
+            border: 3px solid rgba(255,255,255,0.3); 
+            border-top: 3px solid white; 
+            border-radius: 50%;
+            width: 18px; 
+            height: 18px; 
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+
+        /* --- Info Boxes --- */
+        .info { 
+            background-color: var(--info-light); 
+            color: var(--info-dark); 
+            border-left: 4px solid var(--primary);
+            padding: 1rem; 
+            border-radius: var(--radius-sm); 
+            margin-bottom: 1.5rem; 
+            text-align: left; 
+            font-size: 0.95rem;
+        }
+
+        /* --- Result Display --- */
+        .result-display-area {
+            margin-top: 1.5rem; 
+            padding: 1.5rem;
+            background-color: white;
+            border-radius: var(--radius);
+            border: 1px solid var(--neutral-200);
+            text-align: left;
+            word-wrap: break-word; 
+            display: none; 
+            font-size: 0.95em; 
+            min-height: 100px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .result-display-area.error { 
+            background-color: var(--danger-light); 
+            color: var(--danger); 
+            border-left: 4px solid var(--danger);
+        }
+
+        .result-display-area strong.title { 
+            display: block; 
+            margin-bottom: 0.75rem;
+            color: var(--primary); 
+            font-weight: 600; 
+            font-size: 1.1rem;
+            border-bottom: 1px solid var(--neutral-200);
+            padding-bottom: 0.75rem;
+        }
+
+        .result-display-area.error strong.title { 
+            color: var(--danger); 
+        }
+
+        .result-display-area pre {
+            background-color: var(--neutral-50); 
+            padding: 1rem; 
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--neutral-200); 
+            font-family: Monaco, Menlo, Consolas, "Liberation Mono", monospace;
+            white-space: pre-wrap;
+            word-break: break-all; 
+            font-size: 0.9rem; 
+            margin: 0; 
+            color: var(--neutral-800);
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .result-display-area.error pre { 
+            color: var(--danger); 
+            background-color: transparent; 
+            border: none; 
+            padding: 0; 
+            white-space: pre-wrap; 
+            font-family: inherit; 
+            font-size: 1em; 
+        }
+
+        /* --- History List --- */
+        #historyList { 
+            list-style: none; 
+            padding: 0; 
+            max-height: 300px; 
+            overflow-y: auto; 
+            border: 1px solid var(--neutral-200);
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            background-color: white;
+        }
+
+        #historyList li { 
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--neutral-200);
+            cursor: pointer; 
+            font-size: 0.9rem;
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+            transition: background-color 0.2s ease;
+            color: var(--neutral-700);
+        }
+
+        #historyList li:last-child { 
+            border-bottom: none; 
+        }
+
+        #historyList li:hover { 
+            background-color: var(--neutral-100);
+        }
+
+        #historyList li.selected { 
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            font-weight: 500;
+            border-left: 4px solid var(--primary);
+        }
+
+        #historyList li:empty::after { 
+            content: "No history yet."; 
+            font-style: italic; 
+            color: var(--neutral-500); 
+            display: block; 
+            text-align: center; 
+            padding: 1.25rem; 
+        }
+
+        /* --- History Actions --- */
+        .history-actions { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 1.5rem;
+            gap: 0.75rem;
+        }
+
+        .history-actions button { 
+            margin-top: 0; 
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        #showAllButton { 
+            background-color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        #showAllButton:hover { 
+            background-color: #0d9488;
+        }
+
+        #clearHistoryButton { 
+            background-color: var(--danger); 
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        #clearHistoryButton:hover { 
+            background-color: #b91c1c;
+        }
+
+        /* --- URL Tree --- */
+        #urlTreeContainer {
+            font-size: 0.95rem;
+            border: 1px solid var(--neutral-200);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            max-height: 500px;
+            overflow: auto;
+            background-color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
         #urlTreeContainer ul {
             list-style: none;
-            padding-left: 20px; /* Indentation */
-            margin-top: 5px;
+            padding-left: 1.5rem;
+            margin-top: 0.5rem;
         }
+
         #urlTreeContainer li {
-            margin-bottom: 5px;
+            margin-bottom: 0.5rem;
+            position: relative;
         }
-         /* Style for category labels */
+
+        #urlTreeContainer li::before {
+            content: "";
+            position: absolute;
+            left: -1rem;
+            top: 0.7rem;
+            width: 0.5rem;
+            height: 0;
+            border-top: 1px solid var(--neutral-300);
+        }
+
+        #urlTreeContainer ul > li::after {
+            content: "";
+            position: absolute;
+            left: -1rem;
+            top: 0;
+            height: 100%;
+            border-left: 1px solid var(--neutral-300);
+        }
+
+        #urlTreeContainer ul > li:last-child::after {
+            height: 0.7rem;
+        }
+
+        /* Style for category labels */
         #urlTreeContainer .category-label {
             font-weight: 600;
-            color: #333;
-            display: block; /* Put category on its own line */
-            margin-bottom: 3px;
-         }
-         /* Style for URL links */
-         #urlTreeContainer .url-link a {
-            color: #0056b3;
-            text-decoration: none;
-            word-break: break-all; /* Break long URLs */
-            font-size: 0.9em;
-         }
-         #urlTreeContainer .url-link a:hover {
-            text-decoration: underline;
-         }
-         #urlTreeContainer .empty-tree { /* Message if tree is empty */
-            font-style: italic;
-            color: #888;
-            text-align: center;
-            padding: 20px;
-         }
+            color: var(--neutral-700);
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.3rem;
+            padding: 0.25rem 0;
+        }
 
+        #urlTreeContainer .category-label::before {
+            content: "\f07b"; /* folder icon */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            margin-right: 0.5rem;
+            color: var(--primary);
+        }
+
+        /* Style for URL links */
+        #urlTreeContainer .url-link a {
+            color: var(--primary);
+            text-decoration: none;
+            word-break: break-all;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0;
+        }
+
+        #urlTreeContainer .url-link a::before {
+            content: "\f0c1"; /* link icon */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            margin-right: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--neutral-500);
+        }
+
+        #urlTreeContainer .url-link a:hover {
+            text-decoration: underline;
+        }
+
+        #urlTreeContainer .empty-tree {
+            font-style: italic;
+            color: var(--neutral-500);
+            text-align: center;
+            padding: 2rem;
+        }
+
+        /* --- Responsive Styles --- */
+        @media (max-width: 768px) {
+            .main-wrapper {
+                border-radius: var(--radius);
+            }
+            
+            .page-content {
+                padding: 1.25rem;
+            }
+        }
 
         @media (max-width: 600px) {
-             .tab-button { padding: 10px 12px; font-size: 0.85em; } /* Smaller tabs */
-             h1 { font-size: 1.6em; }
-             .page-content { padding: 15px; } /* Less padding */
-             .history-actions { flex-direction: column; gap: 10px; }
-             .history-actions button { width: 100%; }
-             #urlTreeContainer ul { padding-left: 15px; } /* Less indent */
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+                padding: 1rem 0;
+            }
+            
+            .tab-button { 
+                padding: 0.75rem 0.5rem; 
+                font-size: 0.85rem; 
+            }
+            
+            .tab-container {
+                padding: 0;
+            }
+            
+            .tab-button i {
+                margin-right: 0;
+            }
+            
+            .tab-button span {
+                display: none;
+            }
+            
+            .history-actions { 
+                flex-direction: column; 
+            }
+            
+            .history-actions button { 
+                width: 100%; 
+            }
+            
+            #urlTreeContainer ul { 
+                padding-left: 1rem; 
+            }
+
+            .result-display-area pre {
+                font-size: 0.8rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="main-wrapper">
-         <h1>Web Page Classifier</h1>
+        <h1>Web Page Classifier</h1>
 
         <!-- Tab Navigation -->
         <div class="tab-container">
-            <button class="tab-button active" data-target="classifierPage">Classifier</button>
-            <button class="tab-button" data-target="historyPage">History</button>
-            <button class="tab-button" data-target="treePage">URL Tree</button> {/*<!-- ADDED -->*/}
+            <button class="tab-button active" data-target="classifierPage">
+                <i class="fas fa-magnifying-glass"></i>
+                <span>Classifier</span>
+            </button>
+            <button class="tab-button" data-target="historyPage">
+                <i class="fas fa-clock-rotate-left"></i>
+                <span>History</span>
+            </button>
+            <button class="tab-button" data-target="treePage">
+                <i class="fas fa-sitemap"></i>
+                <span>URL Tree</span>
+            </button>
         </div>
 
         <!-- Classifier Page Content -->
         <div id="classifierPage" class="page-content active">
-            {/*<!-- Content remains the same -->*/}
-            <div class="info">Enter a URL. The classification result (JSON) will be displayed below and saved to history.</div>
+            <div class="info">
+                <i class="fas fa-circle-info"></i> Enter a URL. The classification result (JSON) will be displayed below and saved to history.
+            </div>
             <div class="form-group">
                 <label for="pageUrl">Web Page URL:</label>
                 <input type="url" id="pageUrl" placeholder="https://example.com/article" required>
             </div>
-            <button id="classifyButton"><div class="loader" id="loader"></div><span>Classify URL</span></button>
-            <div id="classifierResultDisplay" class="result-display-area"><strong class="title">Result:</strong><pre></pre></div>
+            <button id="classifyButton">
+                <div class="loader" id="loader"></div>
+                <span>Classify URL</span>
+            </button>
+            <div id="classifierResultDisplay" class="result-display-area">
+                <strong class="title">Result:</strong>
+                <pre></pre>
+            </div>
         </div>
 
         <!-- History Page Content -->
         <div id="historyPage" class="page-content">
-             {/*<!-- Content remains mostly the same -->*/}
-             <h2>Classification History List</h2>
-             <ul id="historyList"><li></li></ul>
-             <div class="history-actions">
-                 <button id="showAllButton">Show All URLs & Classifications</button>
-                 <button id="clearHistoryButton">Clear History</button>
-             </div>
-             <div id="historyResultDisplay" class="result-display-area"><strong class="title">Selected / All History:</strong><pre></pre></div>
+            <h2>Classification History List</h2>
+            <ul id="historyList"><li></li></ul>
+            <div class="history-actions">
+                <button id="showAllButton">
+                    <i class="fas fa-list"></i>
+                    <span>Show All URLs & Classifications</span>
+                </button>
+                <button id="clearHistoryButton">
+                    <i class="fas fa-trash-can"></i>
+                    <span>Clear History</span>
+                </button>
+            </div>
+            <div id="historyResultDisplay" class="result-display-area">
+                <strong class="title">Selected / All History:</strong>
+                <pre></pre>
+            </div>
         </div>
 
-        {/*<!-- ADDED: Tree Page Content -->*/}
+        <!-- Tree Page Content -->
         <div id="treePage" class="page-content">
             <h2>URL Classification Tree</h2>
             <div class="info">
-                URLs are categorized based on their classification facets. Click a URL to open it in a new tab.
+                <i class="fas fa-circle-info"></i> URLs are categorized based on their classification facets. Click a URL to open it in a new tab.
             </div>
             <div id="urlTreeContainer">
-                {/*<!-- Tree will be rendered here by JavaScript -->*/}
+                <!-- Tree will be rendered here by JavaScript -->
             </div>
         </div>
 
@@ -203,7 +645,7 @@
         const historyList = document.getElementById('historyList');
         const clearHistoryButton = document.getElementById('clearHistoryButton');
         const showAllButton = document.getElementById('showAllButton');
-        const urlTreeContainer = document.getElementById('urlTreeContainer'); // <-- ADDED
+        const urlTreeContainer = document.getElementById('urlTreeContainer');
         const tabButtons = document.querySelectorAll('.tab-button');
         const pageContents = document.querySelectorAll('.page-content');
 
@@ -212,7 +654,7 @@
 
         // --- Functions ---
 
-        function showLoading(isLoading) { /* (No changes) */
+        function showLoading(isLoading) {
              if (isLoading) {
                 classifyButton.disabled = true;
                 loader.style.display = 'inline-block';
@@ -226,7 +668,7 @@
             }
         }
 
-        function displayResultInArea(areaElement, data, isError = false, titlePrefix = 'Result') { /* (No changes) */
+        function displayResultInArea(areaElement, data, isError = false, titlePrefix = 'Result') {
              areaElement.innerHTML = '';
              areaElement.style.display = 'block';
              const title = document.createElement('strong');
@@ -345,7 +787,7 @@
 
         // --- History List Rendering and Management ---
 
-        function renderHistoryList() { /* (No changes needed) */
+        function renderHistoryList() {
             historyList.innerHTML = '';
             if (classificationHistory.length === 0) {
                  const emptyLi = document.createElement('li');
@@ -371,7 +813,7 @@
             });
          }
 
-        function loadHistory() { /* (Modified to also render tree) */
+        function loadHistory() {
             try {
                 const storedHistory = localStorage.getItem(LOCAL_STORAGE_KEY);
                 classificationHistory = storedHistory ? JSON.parse(storedHistory) : [];
@@ -385,7 +827,7 @@
             renderTree(treeData, urlTreeContainer);
         }
 
-        function saveHistory() { /* (No changes needed) */
+        function saveHistory() {
              try {
                  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(classificationHistory));
              } catch (error) {
@@ -394,7 +836,7 @@
              }
         }
 
-        function addHistoryEntry(url, classificationData) { /* (Modified to update tree) */
+        function addHistoryEntry(url, classificationData) {
              const newEntry = { url: url, classification: classificationData };
              classificationHistory.unshift(newEntry);
              saveHistory();
@@ -404,7 +846,7 @@
              renderTree(treeData, urlTreeContainer);
          }
 
-        function showAllHistory() { /* (No changes needed) */
+        function showAllHistory() {
              if (classificationHistory.length === 0) {
                   displayResultInArea(historyResultDisplay, "History is empty.", true, "Full History");
              } else {
@@ -413,7 +855,7 @@
              document.querySelectorAll('#historyList li.selected').forEach(el => el.classList.remove('selected'));
          }
 
-        function clearHistory() { /* (Modified to clear tree) */
+        function clearHistory() {
             if (confirm("Are you sure you want to clear the entire classification history?")) {
                 classificationHistory = [];
                 saveHistory();
@@ -425,7 +867,7 @@
         }
 
         // --- Tab Switching Logic ---
-        function switchTab(event) { /* (No changes needed) */
+        function switchTab(event) {
              const targetId = event.currentTarget.dataset.target;
              tabButtons.forEach(button => {
                  button.classList.toggle('active', button.dataset.target === targetId);
@@ -436,7 +878,7 @@
         }
 
         // --- Main Classification Function ---
-        async function classifyUrlContent() { /* (No changes needed) */
+        async function classifyUrlContent() {
             const pageUrl = urlInput.value.trim();
             if (!pageUrl || !/^https?:\/\/.+/.test(pageUrl)) {
                  displayResultInArea(classifierResultDisplay, "Please enter a valid URL.", true);
@@ -478,7 +920,6 @@
         });
         // Ensure default tab is active
         document.getElementById('classifierPage').classList.add('active');
-
     </script>
 </body>
 </html>
