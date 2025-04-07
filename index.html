@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Page Classifier (JSON Output)</title>
+    <title>Web Page Classifier w/ History</title>
     <style>
         /* Basic Reset & Font */
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -13,12 +13,27 @@
             line-height: 1.6; background-color: #f0f2f5; color: #333;
             display: flex; justify-content: center; align-items: flex-start;
             padding: 20px;
+            flex-wrap: wrap; /* Allow wrapping if needed */
+            gap: 20px; /* Space between main container and history */
+        }
+        .container, .history-container {
+            background-color: #ffffff; padding: 30px; border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); width: 100%;
         }
         .container {
-            background-color: #ffffff; padding: 30px; border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); width: 100%; max-width: 700px; /* Wider for JSON */
+             max-width: 700px; /* Main content area */
+             flex-basis: 700px; /* Suggest width */
+             flex-grow: 1; /* Allow growing */
+         }
+        .history-container {
+            max-width: 400px; /* History area */
+            flex-basis: 300px; /* Suggest width */
+            flex-grow: 1; /* Allow growing */
+             align-self: flex-start; /* Align history to top */
         }
-        h1 { color: #1a73e8; margin-bottom: 20px; font-weight: 500; text-align: center; }
+        h1, h2 { color: #1a73e8; margin-bottom: 20px; font-weight: 500; text-align: center; }
+        h2 { font-size: 1.3em; margin-bottom: 15px; text-align: left; }
+
         .form-group { margin-bottom: 20px; text-align: left; }
         label { display: block; margin-bottom: 8px; font-weight: 500; color: #555; }
         input[type="url"] {
@@ -48,53 +63,81 @@
         #results {
             margin-top: 30px; padding: 20px; background-color: #e9f2ff;
             border-radius: 8px; border: 1px solid #c6dfff; text-align: left;
-            /* white-space: pre-wrap; */ /* Remove this if using <pre> */
             word-wrap: break-word; display: none; font-size: 0.95em;
+            min-height: 100px; /* Ensure space even when empty */
         }
         #results.error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
         #results strong.title {
             display: block; margin-bottom: 10px; color: #1a73e8; font-weight: 600; font-size: 1.1em;
         }
         #results.error strong.title { color: #721c24; }
-        /* Style for the <pre> tag displaying JSON */
         #results pre {
-            background-color: #f8f9fa; /* Light background for code block */
-            padding: 15px;
-            border-radius: 5px;
-            border: 1px solid #dee2e6;
-            font-family: monospace; /* Use monospaced font for JSON */
-            white-space: pre-wrap; /* Allow wrapping */
-            word-break: break-all; /* Break long strings */
-            font-size: 0.9em;
-            margin: 0; /* Remove default margin */
-            color: #212529; /* Darker text */
+            background-color: #f8f9fa; padding: 15px; border-radius: 5px;
+            border: 1px solid #dee2e6; font-family: monospace; white-space: pre-wrap;
+            word-break: break-all; font-size: 0.9em; margin: 0; color: #212529;
         }
-         #results.error pre { /* Style error text within pre if needed */
-             color: #721c24;
-             background-color: transparent;
-             border: none;
-             padding: 0;
-             white-space: pre-wrap;
-             font-family: inherit; /* Use body font for error text */
-             font-size: 1em;
+        #results.error pre {
+             color: #721c24; background-color: transparent; border: none; padding: 0;
+             white-space: pre-wrap; font-family: inherit; font-size: 1em;
          }
-
         .info {
             background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb;
             padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: left; font-size: 0.9em;
         }
+
+        /* History List Styles */
+        #historyList {
+            list-style: none; padding: 0; max-height: 400px; overflow-y: auto;
+            border: 1px solid #eee; border-radius: 5px; margin-bottom: 15px;
+        }
+        #historyList li {
+            padding: 10px 12px; border-bottom: 1px solid #eee; cursor: pointer;
+            font-size: 0.9em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            transition: background-color 0.2s ease;
+        }
+        #historyList li:last-child { border-bottom: none; }
+        #historyList li:hover { background-color: #f0f2f5; }
+        #historyList li.selected { background-color: #e0eaff; font-weight: 500; }
+        #historyList li:empty::after { /* Show message if history is empty */
+            content: "No history yet.";
+            font-style: italic;
+            color: #888;
+            display: block;
+            text-align: center;
+            padding: 20px;
+        }
+        #clearHistoryButton {
+            background-color: #dc3545; /* Red for delete */
+            font-size: 0.9em; padding: 8px 15px; width: auto; /* Don't make full width */
+            display: block; /* Center it */
+            margin: 0 auto;
+        }
+         #clearHistoryButton:hover { background-color: #c82333; }
+
+
+        @media (max-width: 900px) { /* Adjust layout for smaller screens */
+             body {
+                flex-direction: column; /* Stack vertically */
+                 align-items: center; /* Center items */
+            }
+             .container, .history-container {
+                 max-width: 95%; /* Allow more width */
+                 flex-basis: auto; /* Reset basis */
+             }
+        }
         @media (max-width: 600px) {
-            body { padding: 10px; } .container { padding: 20px; }
-            h1 { font-size: 1.6em; } button { padding: 15px; }
+            body { padding: 10px; } .container, .history-container { padding: 20px; }
+            h1 { font-size: 1.6em; } button#classifyButton { padding: 15px; }
         }
     </style>
 </head>
 <body>
+    <!-- Main Content Area -->
     <div class="container">
-        <h1>Web Page Classifier (JSON)</h1>
+        <h1>Web Page Classifier</h1>
 
         <div class="info">
-            Enter a URL. A backend function will fetch the content, analyze it using Gemini AI, and return a structured JSON classification.
+            Enter a URL. The classification result (JSON) will be displayed and saved locally in your browser's history.
         </div>
 
         <div class="form-group">
@@ -112,9 +155,20 @@
         </div>
     </div>
 
+    <!-- History Sidebar Area -->
+    <div class="history-container">
+        <h2>Classification History</h2>
+        <ul id="historyList">
+            <!-- History items will be added here by JavaScript -->
+             <li></li> <!-- Placeholder for empty message styling -->
+        </ul>
+        <button id="clearHistoryButton">Clear History</button>
+    </div>
+
     <script>
         // --- Configuration ---
         const NETLIFY_FUNCTION_ENDPOINT = '/.netlify/functions/classify-url';
+        const LOCAL_STORAGE_KEY = 'urlClassificationHistory';
 
         // --- DOM Elements ---
         const classifyButton = document.getElementById('classifyButton');
@@ -122,15 +176,22 @@
         const resultsDiv = document.getElementById('results');
         const loader = document.getElementById('loader');
         const buttonText = classifyButton.querySelector('span');
+        const historyList = document.getElementById('historyList');
+        const clearHistoryButton = document.getElementById('clearHistoryButton');
+
+        // --- State ---
+        let classificationHistory = []; // In-memory copy of the history
 
         // --- Functions ---
+
         function showLoading(isLoading) {
             // (Keep this function exactly as before)
             if (isLoading) {
                 classifyButton.disabled = true;
                 loader.style.display = 'inline-block';
                 buttonText.textContent = 'Classifying...';
-                resultsDiv.style.display = 'none';
+                // Don't hide results immediately, user might be viewing history
+                // resultsDiv.style.display = 'none';
                 resultsDiv.classList.remove('error');
             } else {
                 classifyButton.disabled = false;
@@ -139,42 +200,127 @@
             }
         }
 
-        // --- *** Updated displayResult function *** ---
-        function displayResult(data, isError = false) {
+        // Updated display function to accept data and optional source
+        function displayClassification(data, isError = false, source = 'API') {
             resultsDiv.innerHTML = ''; // Clear previous content
-            resultsDiv.style.display = 'block';
+            resultsDiv.style.display = 'block'; // Make sure it's visible
 
             const title = document.createElement('strong');
             title.classList.add('title');
 
-            // Use <pre> for nice JSON formatting or error text
             const resultOutput = document.createElement('pre');
 
             if (isError) {
                 resultsDiv.classList.add('error');
                 title.textContent = 'Error:';
-                // Display error message directly as text content
                 resultOutput.textContent = (typeof data === 'string') ? data : JSON.stringify(data, null, 2);
             } else {
                 resultsDiv.classList.remove('error');
-                title.textContent = 'Classification Result (JSON):';
+                title.textContent = `Classification Result (${source}):`; // Indicate source
                 // Stringify the received JavaScript object with indentation
-                resultOutput.textContent = JSON.stringify(data, null, 2); // null, 2 enables pretty printing
+                resultOutput.textContent = JSON.stringify(data, null, 2);
             }
 
             resultsDiv.appendChild(title);
             resultsDiv.appendChild(resultOutput);
         }
 
+        // Function to render the history list in the UI
+        function renderHistoryList() {
+            historyList.innerHTML = ''; // Clear existing list items
+
+            if (classificationHistory.length === 0) {
+                // Add placeholder for empty message styling to work
+                 const emptyLi = document.createElement('li');
+                 historyList.appendChild(emptyLi);
+                clearHistoryButton.style.display = 'none'; // Hide clear button if empty
+                return;
+            }
+
+             clearHistoryButton.style.display = 'block'; // Show clear button if not empty
+
+            classificationHistory.forEach((item, index) => {
+                const li = document.createElement('li');
+                li.textContent = item.url;
+                li.title = item.url; // Show full URL on hover
+                li.dataset.index = index; // Store index for easy retrieval
+
+                li.addEventListener('click', () => {
+                    // Remove 'selected' class from any other item
+                    document.querySelectorAll('#historyList li.selected').forEach(el => el.classList.remove('selected'));
+                    // Add 'selected' class to the clicked item
+                    li.classList.add('selected');
+                    // Display the classification for this history item
+                    displayClassification(item.classification, false, 'History');
+                });
+
+                historyList.appendChild(li);
+            });
+        }
+
+        // Function to load history from localStorage
+        function loadHistory() {
+            try {
+                const storedHistory = localStorage.getItem(LOCAL_STORAGE_KEY);
+                if (storedHistory) {
+                    classificationHistory = JSON.parse(storedHistory);
+                } else {
+                    classificationHistory = [];
+                }
+            } catch (error) {
+                console.error("Error loading or parsing history from localStorage:", error);
+                classificationHistory = []; // Reset to empty array on error
+                 // Optionally notify user: displayClassification("Could not load history.", true);
+            }
+             renderHistoryList(); // Update the UI with loaded history
+        }
+
+        // Function to save the current history state to localStorage
+        function saveHistory() {
+             try {
+                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(classificationHistory));
+             } catch (error) {
+                 console.error("Error saving history to localStorage:", error);
+                 // Notify user if storage is full?
+                 displayClassification("Could not save history (Storage might be full).", true);
+             }
+        }
+
+        // Function to add a new entry and save
+         function addHistoryEntry(url, classificationData) {
+             // Optional: Prevent duplicates? Or update existing?
+             // For now, just add:
+             const newEntry = { url: url, classification: classificationData };
+             classificationHistory.unshift(newEntry); // Add to the beginning of the array
+             saveHistory();
+             renderHistoryList(); // Update the list view
+         }
+
+
+        // Function to clear the history
+        function clearHistory() {
+            if (confirm("Are you sure you want to clear the entire classification history?")) {
+                classificationHistory = []; // Clear in-memory array
+                saveHistory(); // Persist the empty array to localStorage
+                renderHistoryList(); // Update the UI
+                resultsDiv.style.display = 'none'; // Hide results area
+            }
+        }
+
+
+        // Main function to handle classification request
         async function classifyUrlContent() {
             const pageUrl = urlInput.value.trim();
 
             if (!pageUrl || !/^https?:\/\/.+/.test(pageUrl)) {
-                displayResult("Please enter a valid URL (starting with http:// or https://).", true);
+                displayClassification("Please enter a valid URL (starting with http:// or https://).", true, 'Input Error');
                 return;
             }
 
             showLoading(true);
+            // Clear previous selection highlight in history
+            document.querySelectorAll('#historyList li.selected').forEach(el => el.classList.remove('selected'));
+
 
             try {
                 const response = await fetch(NETLIFY_FUNCTION_ENDPOINT, {
@@ -183,33 +329,39 @@
                     body: JSON.stringify({ url: pageUrl })
                 });
 
-                const data = await response.json(); // Parse the JSON response from the function
+                const data = await response.json();
 
                 if (!response.ok) {
-                    // Use error message from function if available (data.error), otherwise construct one
                     throw new Error(data.error || `Function Error: ${response.status} ${response.statusText}`);
                 }
 
-                // Expecting { classification: { ... } } from the function on success
                 if (data.classification && typeof data.classification === 'object') {
-                    // Pass the actual classification OBJECT to displayResult
-                    displayResult(data.classification);
+                    // Display the new result from API
+                    displayClassification(data.classification, false, 'API');
+                    // Add to history
+                    addHistoryEntry(pageUrl, data.classification);
                 } else {
                     console.error("Unexpected response format:", data);
                      throw new Error("Received an unexpected response format from the classification function.");
                 }
 
             } catch (error) {
-                console.error("Error calling Netlify function or processing result:", error);
-                // Pass the error message string to displayResult
-                displayResult(`An error occurred: ${error.message}`, true);
+                console.error("Error during classification:", error);
+                displayClassification(`Classification failed: ${error.message}`, true, 'Error');
             } finally {
                 showLoading(false);
             }
         }
 
-        // --- Event Listeners (Keep as is) ---
+        // --- Initialization and Event Listeners ---
+
+        // Load history when the script runs
+        loadHistory();
+
+        // Attach event listeners
         classifyButton.addEventListener('click', classifyUrlContent);
+        clearHistoryButton.addEventListener('click', clearHistory);
+
         urlInput.addEventListener('keydown', (event) => {
             if (event.key === 'Enter') {
                 event.preventDefault();
