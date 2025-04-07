@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Page Classifier & History</title>
     <style>
+        /* --- Previous CSS (Reset, Font, Wrapper, Tabs, Page Content, Forms, Buttons, Loader, Results, Info) --- */
         /* Basic Reset & Font */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body { height: 100%; }
@@ -13,76 +14,40 @@
             line-height: 1.6; background-color: #f0f2f5; color: #333;
             padding: 20px;
         }
-        .main-wrapper { /* Added wrapper for better structure */
+        .main-wrapper {
             background-color: #ffffff; padding: 0; border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); width: 100%; max-width: 900px;
-             margin: 0 auto; /* Center the wrapper */
-             overflow: hidden; /* Contain children */
+             margin: 0 auto; overflow: hidden;
         }
-
         /* Tab Styles */
-        .tab-container {
-            display: flex;
-            background-color: #e9ecef;
-            border-bottom: 1px solid #dee2e6;
-        }
+        .tab-container { display: flex; background-color: #e9ecef; border-bottom: 1px solid #dee2e6; }
         .tab-button {
-            padding: 12px 20px;
-            cursor: pointer;
-            border: none;
-            background-color: transparent;
-            font-size: 1rem;
-            font-weight: 500;
-            color: #495057;
-            transition: background-color 0.2s ease, color 0.2s ease;
-            border-bottom: 3px solid transparent; /* Placeholder for active border */
-            margin-bottom: -1px; /* Overlap border */
+            padding: 12px 20px; cursor: pointer; border: none; background-color: transparent;
+            font-size: 1rem; font-weight: 500; color: #495057; transition: background-color 0.2s ease, color 0.2s ease;
+            border-bottom: 3px solid transparent; margin-bottom: -1px;
         }
-        .tab-button:hover {
-            background-color: #f8f9fa;
-            color: #0056b3;
-        }
-        .tab-button.active {
-            color: #0056b3;
-            background-color: #ffffff; /* Match page background */
-            border-bottom: 3px solid #1a73e8;
-        }
-
+        .tab-button:hover { background-color: #f8f9fa; color: #0056b3; }
+        .tab-button.active { color: #0056b3; background-color: #ffffff; border-bottom: 3px solid #1a73e8; }
         /* Page Content Styles */
-        .page-content {
-            display: none; /* Hide pages by default */
-            padding: 30px; /* Add padding inside pages */
-        }
-        .page-content.active {
-            display: block; /* Show active page */
-        }
-
-        /* Element Styles (mostly reused) */
+        .page-content { display: none; padding: 30px; }
+        .page-content.active { display: block; }
+        /* Element Styles */
         h1, h2 { color: #1a73e8; margin-bottom: 20px; font-weight: 500; }
-        h1 { text-align: center; font-size: 1.8em; padding-top: 20px;} /* Adjust h1 position */
+        h1 { text-align: center; font-size: 1.8em; padding-top: 20px;}
         h2 { font-size: 1.3em; margin-bottom: 15px; text-align: left; }
-
         .form-group { margin-bottom: 20px; text-align: left; }
         label { display: block; margin-bottom: 8px; font-weight: 500; color: #555; }
         input[type="url"] {
             width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px;
             font-size: 1rem; font-family: inherit;
         }
-        input[type="url"]:focus {
-            outline: none; border-color: #1a73e8;
-            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
-        }
-        button { /* General button style */
+        input[type="url"]:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2); }
+        button {
             background-color: #1a73e8; color: white; border: none; padding: 12px 25px;
             border-radius: 5px; font-size: 1rem; cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.1s ease;
-             margin-top: 10px;
+            transition: background-color 0.3s ease, transform 0.1s ease; margin-top: 10px;
         }
-         button#classifyButton { /* Specific button styles if needed */
-             display: inline-flex; align-items: center; justify-content: center;
-             min-width: 150px; width: 100%;
-         }
-
+        button#classifyButton { display: inline-flex; align-items: center; justify-content: center; min-width: 150px; width: 100%; }
         button:hover { background-color: #155ab6; }
         button:active { transform: scale(0.98); }
         button:disabled { background-color: #cccccc; cursor: not-allowed; }
@@ -92,81 +57,86 @@
             margin-right: 10px; display: none;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Result Display Styles (for both pages) */
+        /* Result Display Styles */
         .result-display-area {
             margin-top: 30px; padding: 20px; background-color: #e9f2ff;
             border-radius: 8px; border: 1px solid #c6dfff; text-align: left;
-            word-wrap: break-word; display: none; font-size: 0.95em;
-            min-height: 100px;
+            word-wrap: break-word; display: none; font-size: 0.95em; min-height: 100px;
         }
         .result-display-area.error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
-        .result-display-area strong.title {
-            display: block; margin-bottom: 10px; color: #1a73e8; font-weight: 600; font-size: 1.1em;
-        }
+        .result-display-area strong.title { display: block; margin-bottom: 10px; color: #1a73e8; font-weight: 600; font-size: 1.1em; }
         .result-display-area.error strong.title { color: #721c24; }
         .result-display-area pre {
             background-color: #f8f9fa; padding: 15px; border-radius: 5px;
             border: 1px solid #dee2e6; font-family: monospace; white-space: pre-wrap;
             word-break: break-all; font-size: 0.9em; margin: 0; color: #212529;
         }
-        .result-display-area.error pre {
-             color: #721c24; background-color: transparent; border: none; padding: 0;
-             white-space: pre-wrap; font-family: inherit; font-size: 1em;
-         }
-
-        .info {
-            background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb;
-            padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: left; font-size: 0.9em;
-        }
-
+        .result-display-area.error pre { color: #721c24; background-color: transparent; border: none; padding: 0; white-space: pre-wrap; font-family: inherit; font-size: 1em; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; padding: 15px; border-radius: 5px; margin-bottom: 20px; text-align: left; font-size: 0.9em; }
         /* History List Specific Styles */
-        #historyList {
-            list-style: none; padding: 0; max-height: 300px; overflow-y: auto; /* Adjusted height */
-            border: 1px solid #eee; border-radius: 5px; margin-bottom: 15px;
-        }
-        #historyList li {
-            padding: 10px 12px; border-bottom: 1px solid #eee; cursor: pointer;
-            font-size: 0.9em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-            transition: background-color 0.2s ease;
-        }
+        #historyList { list-style: none; padding: 0; max-height: 300px; overflow-y: auto; border: 1px solid #eee; border-radius: 5px; margin-bottom: 15px; }
+        #historyList li { padding: 10px 12px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 0.9em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background-color 0.2s ease; }
         #historyList li:last-child { border-bottom: none; }
         #historyList li:hover { background-color: #f0f2f5; }
         #historyList li.selected { background-color: #e0eaff; font-weight: 500; }
-        #historyList li:empty::after {
-            content: "No history yet."; font-style: italic; color: #888;
-            display: block; text-align: center; padding: 20px;
-        }
+        #historyList li:empty::after { content: "No history yet."; font-style: italic; color: #888; display: block; text-align: center; padding: 20px; }
+        /* History Page Buttons */
+        .history-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 15px; }
+        .history-actions button { margin-top: 0; padding: 8px 15px; font-size: 0.9em; flex-shrink: 0; }
+        #showAllButton { background-color: #28a745; }
+        #showAllButton:hover { background-color: #218838; }
+        #clearHistoryButton { background-color: #dc3545; }
+        #clearHistoryButton:hover { background-color: #c82333; }
 
-         /* History Page Buttons */
-         .history-actions {
-             display: flex;
-             justify-content: space-between; /* Space out buttons */
-             align-items: center;
-             margin-bottom: 20px; /* Space before result area */
-             gap: 15px;
+        /* --- NEW: URL Tree Styles --- */
+        #urlTreeContainer {
+            font-size: 0.95em;
+             border: 1px solid #eee; /* Optional border */
+             padding: 15px;
+             border-radius: 5px;
+             max-height: 500px; /* Limit height */
+             overflow: auto; /* Add scrollbars if needed */
+        }
+        #urlTreeContainer ul {
+            list-style: none;
+            padding-left: 20px; /* Indentation */
+            margin-top: 5px;
+        }
+        #urlTreeContainer li {
+            margin-bottom: 5px;
+        }
+         /* Style for category labels */
+        #urlTreeContainer .category-label {
+            font-weight: 600;
+            color: #333;
+            display: block; /* Put category on its own line */
+            margin-bottom: 3px;
          }
-        .history-actions button {
-             margin-top: 0; /* Remove default top margin */
-             padding: 8px 15px;
-             font-size: 0.9em;
-             flex-shrink: 0; /* Prevent shrinking */
+         /* Style for URL links */
+         #urlTreeContainer .url-link a {
+            color: #0056b3;
+            text-decoration: none;
+            word-break: break-all; /* Break long URLs */
+            font-size: 0.9em;
          }
-        #showAllButton {
-             background-color: #28a745; /* Green */
+         #urlTreeContainer .url-link a:hover {
+            text-decoration: underline;
          }
-         #showAllButton:hover { background-color: #218838; }
-        #clearHistoryButton {
-             background-color: #dc3545; /* Red */
+         #urlTreeContainer .empty-tree { /* Message if tree is empty */
+            font-style: italic;
+            color: #888;
+            text-align: center;
+            padding: 20px;
          }
-         #clearHistoryButton:hover { background-color: #c82333; }
+
 
         @media (max-width: 600px) {
-             .tab-button { padding: 10px 15px; font-size: 0.9em; }
+             .tab-button { padding: 10px 12px; font-size: 0.85em; } /* Smaller tabs */
              h1 { font-size: 1.6em; }
-             .page-content { padding: 20px; }
+             .page-content { padding: 15px; } /* Less padding */
              .history-actions { flex-direction: column; gap: 10px; }
              .history-actions button { width: 100%; }
+             #urlTreeContainer ul { padding-left: 15px; } /* Less indent */
         }
     </style>
 </head>
@@ -178,48 +148,41 @@
         <div class="tab-container">
             <button class="tab-button active" data-target="classifierPage">Classifier</button>
             <button class="tab-button" data-target="historyPage">History</button>
+            <button class="tab-button" data-target="treePage">URL Tree</button> {/*<!-- ADDED -->*/}
         </div>
 
         <!-- Classifier Page Content -->
         <div id="classifierPage" class="page-content active">
-            <div class="info">
-                Enter a URL. The classification result (JSON) will be displayed below and saved to history.
-            </div>
-
+            {/*<!-- Content remains the same -->*/}
+            <div class="info">Enter a URL. The classification result (JSON) will be displayed below and saved to history.</div>
             <div class="form-group">
                 <label for="pageUrl">Web Page URL:</label>
                 <input type="url" id="pageUrl" placeholder="https://example.com/article" required>
             </div>
-
-            <button id="classifyButton">
-                <div class="loader" id="loader"></div>
-                <span>Classify URL</span>
-            </button>
-
-            <!-- Result display specific to classifier page -->
-            <div id="classifierResultDisplay" class="result-display-area">
-                 <strong class="title">Result:</strong>
-                 <pre><!-- API result here --></pre>
-            </div>
+            <button id="classifyButton"><div class="loader" id="loader"></div><span>Classify URL</span></button>
+            <div id="classifierResultDisplay" class="result-display-area"><strong class="title">Result:</strong><pre></pre></div>
         </div>
 
         <!-- History Page Content -->
         <div id="historyPage" class="page-content">
-             <h2>Classification History</h2>
-
-             <ul id="historyList">
-                 <li></li> <!-- Placeholder for empty message styling -->
-             </ul>
-
+             {/*<!-- Content remains mostly the same -->*/}
+             <h2>Classification History List</h2>
+             <ul id="historyList"><li></li></ul>
              <div class="history-actions">
                  <button id="showAllButton">Show All URLs & Classifications</button>
                  <button id="clearHistoryButton">Clear History</button>
              </div>
+             <div id="historyResultDisplay" class="result-display-area"><strong class="title">Selected / All History:</strong><pre></pre></div>
+        </div>
 
-            <!-- Result display specific to history page -->
-            <div id="historyResultDisplay" class="result-display-area">
-                <strong class="title">Selected / All History:</strong>
-                <pre><!-- Selected or All history JSON here --></pre>
+        {/*<!-- ADDED: Tree Page Content -->*/}
+        <div id="treePage" class="page-content">
+            <h2>URL Classification Tree</h2>
+            <div class="info">
+                URLs are categorized based on their classification facets. Click a URL to open it in a new tab.
+            </div>
+            <div id="urlTreeContainer">
+                {/*<!-- Tree will be rendered here by JavaScript -->*/}
             </div>
         </div>
 
@@ -235,11 +198,12 @@
         const urlInput = document.getElementById('pageUrl');
         const loader = document.getElementById('loader');
         const buttonText = classifyButton.querySelector('span');
-        const classifierResultDisplay = document.getElementById('classifierResultDisplay'); // Classifier result area
-        const historyResultDisplay = document.getElementById('historyResultDisplay');   // History result area
+        const classifierResultDisplay = document.getElementById('classifierResultDisplay');
+        const historyResultDisplay = document.getElementById('historyResultDisplay');
         const historyList = document.getElementById('historyList');
         const clearHistoryButton = document.getElementById('clearHistoryButton');
         const showAllButton = document.getElementById('showAllButton');
+        const urlTreeContainer = document.getElementById('urlTreeContainer'); // <-- ADDED
         const tabButtons = document.querySelectorAll('.tab-button');
         const pageContents = document.querySelectorAll('.page-content');
 
@@ -248,13 +212,12 @@
 
         // --- Functions ---
 
-        function showLoading(isLoading) {
-            // Only affect the classifier button
-            if (isLoading) {
+        function showLoading(isLoading) { /* (No changes) */
+             if (isLoading) {
                 classifyButton.disabled = true;
-                loader.style.display = 'inline-block'; // Changed from 'flex' if using inline-flex on button
+                loader.style.display = 'inline-block';
                 buttonText.textContent = 'Classifying...';
-                classifierResultDisplay.style.display = 'none'; // Hide previous classifier result
+                classifierResultDisplay.style.display = 'none';
                 classifierResultDisplay.classList.remove('error');
             } else {
                 classifyButton.disabled = false;
@@ -263,67 +226,152 @@
             }
         }
 
-        // Generic function to display results in a specific area
-        function displayResultInArea(areaElement, data, isError = false, titlePrefix = 'Result') {
-             areaElement.innerHTML = ''; // Clear previous content
-             areaElement.style.display = 'block'; // Make sure it's visible
-
+        function displayResultInArea(areaElement, data, isError = false, titlePrefix = 'Result') { /* (No changes) */
+             areaElement.innerHTML = '';
+             areaElement.style.display = 'block';
              const title = document.createElement('strong');
              title.classList.add('title');
              const resultOutput = document.createElement('pre');
-
              if (isError) {
                  areaElement.classList.add('error');
-                 title.textContent = `Error:`; // Keep title simple for errors
+                 title.textContent = `Error:`;
                  resultOutput.textContent = (typeof data === 'string') ? data : JSON.stringify(data, null, 2);
              } else {
                  areaElement.classList.remove('error');
                  title.textContent = `${titlePrefix}:`;
                  resultOutput.textContent = JSON.stringify(data, null, 2);
              }
-
              areaElement.appendChild(title);
              areaElement.appendChild(resultOutput);
          }
 
+        // --- Tree Building Logic ---
+        function buildUrlTree(history) {
+            const tree = {}; // Root of the tree
 
-        // Render the history list in the UI (targets #historyList)
-        function renderHistoryList() {
-            historyList.innerHTML = ''; // Clear existing list items
+            history.forEach(item => {
+                if (!item.classification) return; // Skip if classification is missing
 
+                const classification = item.classification.classification; // Access nested classification data
+                if (!classification) return; // Skip if nested classification is missing
+
+                // Define facets to build the tree hierarchy
+                const urlType = classification.url_type || 'Unknown Type';
+                const format = classification.content_format || 'Unknown Format';
+                const hierarchy = Array.isArray(classification.content_type_hierarchy) && classification.content_type_hierarchy.length > 0
+                                  ? classification.content_type_hierarchy
+                                  : ['Unknown Category']; // Use a default if empty or not an array
+
+                let currentLevel = tree;
+
+                // Level 1: URL Type
+                if (!currentLevel[urlType]) currentLevel[urlType] = {};
+                currentLevel = currentLevel[urlType];
+
+                // Level 2: Content Format
+                if (!currentLevel[format]) currentLevel[format] = {};
+                currentLevel = currentLevel[format];
+
+                // Levels 3+: Content Type Hierarchy
+                hierarchy.forEach((category, index) => {
+                    const isLastLevel = index === hierarchy.length - 1;
+                    if (isLastLevel) {
+                        // Leaf node (category containing URLs)
+                        if (!currentLevel[category]) currentLevel[category] = [];
+                        // Avoid adding duplicate URLs at the same leaf
+                        if (!currentLevel[category].includes(item.url)) {
+                            currentLevel[category].push(item.url);
+                        }
+                    } else {
+                        // Intermediate category node
+                        if (!currentLevel[category]) currentLevel[category] = {};
+                        currentLevel = currentLevel[category];
+                    }
+                });
+            });
+             console.log("Built Tree:", tree); // For debugging
+            return tree;
+        }
+
+        // --- Tree Rendering Logic ---
+        function renderTree(treeData, containerElement) {
+            containerElement.innerHTML = ''; // Clear previous tree
+
+            if (Object.keys(treeData).length === 0) {
+                 containerElement.innerHTML = '<div class="empty-tree">No classification data available to build the tree.</div>';
+                 return;
+            }
+
+            const rootUl = document.createElement('ul');
+            containerElement.appendChild(rootUl);
+            renderTreeNode(treeData, rootUl); // Start recursion
+        }
+
+        function renderTreeNode(node, parentUl) {
+             // Sort keys for consistent order
+            const categories = Object.keys(node).sort();
+
+            categories.forEach(category => {
+                const li = document.createElement('li');
+                const categoryLabel = document.createElement('span');
+                categoryLabel.classList.add('category-label');
+                categoryLabel.textContent = category;
+                li.appendChild(categoryLabel);
+
+                const childNode = node[category];
+                const nestedUl = document.createElement('ul');
+
+                if (Array.isArray(childNode)) { // Leaf node with URLs
+                    childNode.sort().forEach(url => { // Sort URLs alphabetically
+                        const urlLi = document.createElement('li');
+                        urlLi.classList.add('url-link');
+                        const urlLink = document.createElement('a');
+                        urlLink.href = url;
+                        urlLink.textContent = url;
+                        urlLink.target = '_blank'; // Open in new tab
+                        urlLink.rel = 'noopener noreferrer';
+                        urlLi.appendChild(urlLink);
+                        nestedUl.appendChild(urlLi);
+                    });
+                } else if (typeof childNode === 'object' && childNode !== null) { // Intermediate node
+                    renderTreeNode(childNode, nestedUl); // Recurse
+                }
+
+                li.appendChild(nestedUl); // Append the list of sub-categories or URLs
+                parentUl.appendChild(li); // Append the category item
+            });
+        }
+
+
+        // --- History List Rendering and Management ---
+
+        function renderHistoryList() { /* (No changes needed) */
+            historyList.innerHTML = '';
             if (classificationHistory.length === 0) {
                  const emptyLi = document.createElement('li');
                  historyList.appendChild(emptyLi);
-                // clearHistoryButton.style.display = 'none'; // Managed by CSS/layout now potentially
-                // showAllButton.style.display = 'none';
                 return;
             }
-
-            // clearHistoryButton.style.display = 'inline-block';
-            // showAllButton.style.display = 'inline-block';
-
             classificationHistory.forEach((item, index) => {
                 const li = document.createElement('li');
                 li.textContent = item.url;
-                li.title = item.url; // Show full URL on hover
-                li.dataset.index = index; // Store index for easy retrieval
-
+                li.title = item.url;
+                li.dataset.index = index;
                 li.addEventListener('click', () => {
-                    // Highlight selection
                     document.querySelectorAll('#historyList li.selected').forEach(el => el.classList.remove('selected'));
                     li.classList.add('selected');
-                    // Display the classification for this history item IN THE HISTORY AREA
                     const selectedItem = classificationHistory[index];
-                    if (selectedItem) {
+                    if (selectedItem?.classification) { // Check if classification exists
                          displayResultInArea(historyResultDisplay, selectedItem.classification, false, 'Selected History');
+                    } else {
+                        displayResultInArea(historyResultDisplay, "Classification data missing for this entry.", true, 'Selected History');
                     }
                 });
                 historyList.appendChild(li);
             });
-        }
+         }
 
-        // Load history from localStorage
-        function loadHistory() {
+        function loadHistory() { /* (Modified to also render tree) */
             try {
                 const storedHistory = localStorage.getItem(LOCAL_STORAGE_KEY);
                 classificationHistory = storedHistory ? JSON.parse(storedHistory) : [];
@@ -331,11 +379,13 @@
                 console.error("Error loading/parsing history:", error);
                 classificationHistory = [];
             }
-            renderHistoryList(); // Render into the history page list
+            renderHistoryList();
+            // Build and render the tree after loading history
+            const treeData = buildUrlTree(classificationHistory);
+            renderTree(treeData, urlTreeContainer);
         }
 
-        // Save history state to localStorage
-        function saveHistory() {
+        function saveHistory() { /* (No changes needed) */
              try {
                  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(classificationHistory));
              } catch (error) {
@@ -344,87 +394,71 @@
              }
         }
 
-        // Add a new entry and save
-         function addHistoryEntry(url, classificationData) {
+        function addHistoryEntry(url, classificationData) { /* (Modified to update tree) */
              const newEntry = { url: url, classification: classificationData };
-             // Optional: Check for duplicates by URL and update instead of adding?
-             // Simple add to top for now:
              classificationHistory.unshift(newEntry);
              saveHistory();
-             renderHistoryList(); // Update the list view on the history page
+             renderHistoryList(); // Update list view
+             // Re-build and re-render the tree
+             const treeData = buildUrlTree(classificationHistory);
+             renderTree(treeData, urlTreeContainer);
          }
 
-        // Show the entire history JSON in the history display area
-        function showAllHistory() {
+        function showAllHistory() { /* (No changes needed) */
              if (classificationHistory.length === 0) {
                   displayResultInArea(historyResultDisplay, "History is empty.", true, "Full History");
              } else {
                  displayResultInArea(historyResultDisplay, classificationHistory, false, "All Stored Classifications");
              }
-              // Deselect any specific list item
              document.querySelectorAll('#historyList li.selected').forEach(el => el.classList.remove('selected'));
          }
 
-
-        // Clear the history
-        function clearHistory() {
+        function clearHistory() { /* (Modified to clear tree) */
             if (confirm("Are you sure you want to clear the entire classification history?")) {
                 classificationHistory = [];
                 saveHistory();
                 renderHistoryList();
-                historyResultDisplay.style.display = 'none'; // Hide history result area
+                historyResultDisplay.style.display = 'none';
+                // Clear the tree view
+                urlTreeContainer.innerHTML = '<div class="empty-tree">History cleared.</div>';
             }
         }
 
-        // Switch active tab and page content
-        function switchTab(event) {
+        // --- Tab Switching Logic ---
+        function switchTab(event) { /* (No changes needed) */
              const targetId = event.currentTarget.dataset.target;
-
-             // Update tab button styles
              tabButtons.forEach(button => {
                  button.classList.toggle('active', button.dataset.target === targetId);
              });
-
-             // Show/Hide page content
              pageContents.forEach(page => {
                  page.classList.toggle('active', page.id === targetId);
              });
         }
 
-
-        // Main function to handle classification request
-        async function classifyUrlContent() {
+        // --- Main Classification Function ---
+        async function classifyUrlContent() { /* (No changes needed) */
             const pageUrl = urlInput.value.trim();
-
             if (!pageUrl || !/^https?:\/\/.+/.test(pageUrl)) {
                  displayResultInArea(classifierResultDisplay, "Please enter a valid URL.", true);
                 return;
             }
-
             showLoading(true);
-
             try {
                 const response = await fetch(NETLIFY_FUNCTION_ENDPOINT, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ url: pageUrl })
                 });
-
-                const data = await response.json();
-
+                const data = await response.json(); // Expect { classification: { THE_JSON_OBJECT } } or { error: "..." }
                 if (!response.ok) {
                     throw new Error(data.error || `Function Error: ${response.status} ${response.statusText}`);
                 }
-
                 if (data.classification && typeof data.classification === 'object') {
-                    // Display the new result in the CLASSIFIER area
                     displayResultInArea(classifierResultDisplay, data.classification, false, 'API Result');
-                    // Add to history (updates list in history tab)
-                    addHistoryEntry(pageUrl, data.classification);
+                    addHistoryEntry(pageUrl, data.classification); // Pass the actual classification object
                 } else {
                      throw new Error("Received an unexpected response format.");
                 }
-
             } catch (error) {
                 console.error("Error during classification:", error);
                  displayResultInArea(classifierResultDisplay, `Classification failed: ${error.message}`, true);
@@ -434,29 +468,16 @@
         }
 
         // --- Initialization and Event Listeners ---
-
-        // Load history on startup
-        loadHistory();
-
-        // Attach tab switching listeners
+        loadHistory(); // Load history and render list/tree on startup
         tabButtons.forEach(button => button.addEventListener('click', switchTab));
-
-        // Attach other listeners
         classifyButton.addEventListener('click', classifyUrlContent);
         clearHistoryButton.addEventListener('click', clearHistory);
         showAllButton.addEventListener('click', showAllHistory);
-
         urlInput.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                classifyUrlContent();
-            }
+            if (event.key === 'Enter') { event.preventDefault(); classifyUrlContent(); }
         });
-
-         // Ensure the default tab content is shown initially (redundant if HTML class is set, but safe)
-         document.getElementById('classifierPage').classList.add('active');
-         document.getElementById('historyPage').classList.remove('active');
-
+        // Ensure default tab is active
+        document.getElementById('classifierPage').classList.add('active');
 
     </script>
 </body>
