@@ -66,8 +66,7 @@ exports.handler = async (event, context) => {
              throw new Error("Could not extract meaningful text content from the URL.");
         }
 
-        // 6. *** Prepare NEW Prompt for Gemini (Hierarchical JSON Output) ***
-        //    Define the desired JSON structure and guide the AI.
+        // 6. Prepare NEW Prompt for Gemini (Hierarchical JSON Output)
         const prompt = `
 Analyze the following web page content and classify it according to the specified facets.
 Provide the output ONLY as a valid JSON object adhering strictly to the structure below. Do not include any introductory text, explanations, or markdown formatting around the JSON.
@@ -76,20 +75,14 @@ JSON Output Structure:
 {
   "classification": {
     "url_type": "...",           // e.g., "Website", "Blog", "News Site", "Forum", "E-commerce", "File", "Media Page", "Data Endpoint", "Other"
-    "content_format": "...",     // e.g., "HTML", "PDF", "Image", "Video", "Audio", "JSON", "XML", "Text File", "Other" (Infer from URL or content if possible, default to HTML for web pages)
-    "content_type_hierarchy": [ // Array representing hierarchy, from general to specific. Add relevant levels.
+    "content_format": "...",     // e.g., "HTML", "PDF", "Image", "Video", "Audio", "JSON", "XML", "Text File", "Other"
+    "content_type_hierarchy": [  // Array representing hierarchy, from general to specific.
       // e.g., ["Text", "News Article", "Technology"]
-      // e.g., ["Text", "Blog Post", "Travel"]
-      // e.g., ["Media", "Video", "Tutorial"]
-      // e.g., ["Product", "Electronics", "Smartphone"]
-      // e.g., ["Service", "Web Tool", "Converter"]
-      // e.g., ["Data", "API Documentation"]
-      // Use ["Other"] if unclassifiable
     ],
-    "primary_language": "..."   // e.g., "English", "Spanish", "Japanese", "Undetermined"
+    "primary_language": "..."    // e.g., "English", "Spanish", "Japanese", "Undetermined"
   },
-  "confidence": "High | Medium | Low", // Your confidence level in this classification
-  "keywords": ["...", "...", "..."] // List 3-5 relevant keywords from the content
+  "confidence": "High | Medium | Low",
+  "keywords": ["...", "...", "..."]
 }
 
 Target URL (for context): ${targetUrl}
@@ -98,9 +91,9 @@ Webpage Text Content (extracted and possibly truncated):
 ${truncatedContent}
 ---
 
-JSON Output:`; // Explicitly ask for the JSON output here
+JSON Output:`;
 
-        // 7. Call Gemini API (Keep as is)
+        // 7. Call Gemini API
         console.log("Calling Gemini API for JSON classification...");
         const geminiResponse = await fetch(GEMINI_API_URL, {
             method: 'POST',
@@ -115,28 +108,21 @@ JSON Output:`; // Explicitly ask for the JSON output here
              throw new Error(`Gemini API Error: ${errorDetails}`);
         }
 
-        // 8. *** Extract and PARSE Classification JSON from Gemini Response ***
+        // 8. Extract and parse Classification JSON from the response.
         let classificationJson;
-        let rawResultText = "No valid response received from AI."; // Default
-
+        let rawResultText = "No valid response received from AI.";
         if (geminiData.candidates && geminiData.candidates[0]?.content?.parts[0]?.text) {
             rawResultText = geminiData.candidates[0].content.parts[0].text;
-            console.log("Raw AI Response Text:\n", rawResultText); // Log the raw response for debugging
-
+            console.log("Raw AI Response Text:\n", rawResultText);
             try {
-                // Attempt to parse the raw text as JSON
-                // Sometimes the AI might wrap the JSON in markdown backticks, try to strip them
                 const cleanJsonString = rawResultText
-                    .replace(/^```json\s*/, '') // Remove leading ```json
-                    .replace(/```\s*$/, '')      // Remove trailing ```
-                    .trim();                     // Trim whitespace
-
+                    .replace(/^```json\s*/, '')
+                    .replace(/```\s*$/, '')
+                    .trim();
                 classificationJson = JSON.parse(cleanJsonString);
                 console.log("Parsed Classification JSON:", classificationJson);
-
             } catch (parseError) {
                 console.error("Failed to parse JSON from AI response:", parseError);
-                // Log the problematic text
                 console.error("Problematic raw text:", rawResultText);
                 throw new Error(`AI returned a response, but it was not valid JSON. Response: ${rawResultText.substring(0, 200)}...`);
             }
@@ -148,20 +134,17 @@ JSON Output:`; // Explicitly ask for the JSON output here
                  body: JSON.stringify({ error: blockMessage }),
              };
         } else {
-             // Handle cases where Gemini gives an OK status but no candidate text
              console.error("Gemini response OK, but no candidate text found.", geminiData);
              throw new Error("AI response was missing the expected content.");
         }
 
-        // 9. Return Success Response (containing the PARSED JSON object) to Frontend
+        // 9. Return Success Response
         return {
             statusCode: 200,
-            // IMPORTANT: Stringify the *entire payload*, where the classification itself is already an object
             body: JSON.stringify({ classification: classificationJson }),
         };
 
     } catch (error) {
-        // 10. Handle Errors (Keep general structure)
         console.error("Error in Netlify function:", error);
         return {
             statusCode: 500,

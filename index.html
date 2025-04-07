@@ -231,6 +231,17 @@
             width: 100%; 
         }
 
+        /* Style for delete buttons in history and tree */
+        .delete-button {
+            background: transparent;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+        }
+        .delete-button:hover {
+            color: var(--danger-dark);
+        }
+
         /* --- Loader --- */
         .loader {
             border: 3px solid rgba(255,255,255,0.3); 
@@ -338,6 +349,9 @@
             border-bottom: 1px solid var(--neutral-200);
             cursor: pointer; 
             font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             white-space: nowrap; 
             overflow: hidden; 
             text-overflow: ellipsis; 
@@ -430,6 +444,12 @@
             position: relative;
         }
 
+        /* Folder toggle icon */
+        .toggle-icon {
+            cursor: pointer;
+            margin-right: 0.5rem;
+        }
+
         #urlTreeContainer li::before {
             content: "";
             position: absolute;
@@ -457,7 +477,7 @@
         #urlTreeContainer .category-label {
             font-weight: 600;
             color: var(--neutral-700);
-            display: flex;
+            display: inline-flex;
             align-items: center;
             margin-bottom: 0.3rem;
             padding: 0.25rem 0;
@@ -472,6 +492,13 @@
         }
 
         /* Style for URL links */
+        #urlTreeContainer .url-link {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.25rem 0;
+        }
+
         #urlTreeContainer .url-link a {
             color: var(--primary);
             text-decoration: none;
@@ -479,7 +506,6 @@
             font-size: 0.9rem;
             display: inline-flex;
             align-items: center;
-            padding: 0.25rem 0;
         }
 
         #urlTreeContainer .url-link a::before {
@@ -621,7 +647,7 @@
         <div id="treePage" class="page-content">
             <h2>URL Classification Tree</h2>
             <div class="info">
-                <i class="fas fa-circle-info"></i> URLs are categorized based on their classification facets. Click a URL to open it in a new tab.
+                <i class="fas fa-circle-info"></i> URLs are categorized based on their classification facets. Click a folder to fold/unfold, and click the delete icon to remove an entry.
             </div>
             <div id="urlTreeContainer">
                 <!-- Tree will be rendered here by JavaScript -->
@@ -652,10 +678,15 @@
         // --- State ---
         let classificationHistory = []; // In-memory copy
 
+        // --- Helper: Generate Unique ID ---
+        function generateId() {
+            return Date.now() + Math.random().toString(16).slice(2);
+        }
+
         // --- Functions ---
 
         function showLoading(isLoading) {
-             if (isLoading) {
+            if (isLoading) {
                 classifyButton.disabled = true;
                 loader.style.display = 'inline-block';
                 buttonText.textContent = 'Classifying...';
@@ -669,149 +700,72 @@
         }
 
         function displayResultInArea(areaElement, data, isError = false, titlePrefix = 'Result') {
-             areaElement.innerHTML = '';
-             areaElement.style.display = 'block';
-             const title = document.createElement('strong');
-             title.classList.add('title');
-             const resultOutput = document.createElement('pre');
-             if (isError) {
-                 areaElement.classList.add('error');
-                 title.textContent = `Error:`;
-                 resultOutput.textContent = (typeof data === 'string') ? data : JSON.stringify(data, null, 2);
-             } else {
-                 areaElement.classList.remove('error');
-                 title.textContent = `${titlePrefix}:`;
-                 resultOutput.textContent = JSON.stringify(data, null, 2);
-             }
-             areaElement.appendChild(title);
-             areaElement.appendChild(resultOutput);
-         }
-
-        // --- Tree Building Logic ---
-        function buildUrlTree(history) {
-            const tree = {}; // Root of the tree
-
-            history.forEach(item => {
-                if (!item.classification) return; // Skip if classification is missing
-
-                const classification = item.classification.classification; // Access nested classification data
-                if (!classification) return; // Skip if nested classification is missing
-
-                // Define facets to build the tree hierarchy
-                const urlType = classification.url_type || 'Unknown Type';
-                const format = classification.content_format || 'Unknown Format';
-                const hierarchy = Array.isArray(classification.content_type_hierarchy) && classification.content_type_hierarchy.length > 0
-                                  ? classification.content_type_hierarchy
-                                  : ['Unknown Category']; // Use a default if empty or not an array
-
-                let currentLevel = tree;
-
-                // Level 1: URL Type
-                if (!currentLevel[urlType]) currentLevel[urlType] = {};
-                currentLevel = currentLevel[urlType];
-
-                // Level 2: Content Format
-                if (!currentLevel[format]) currentLevel[format] = {};
-                currentLevel = currentLevel[format];
-
-                // Levels 3+: Content Type Hierarchy
-                hierarchy.forEach((category, index) => {
-                    const isLastLevel = index === hierarchy.length - 1;
-                    if (isLastLevel) {
-                        // Leaf node (category containing URLs)
-                        if (!currentLevel[category]) currentLevel[category] = [];
-                        // Avoid adding duplicate URLs at the same leaf
-                        if (!currentLevel[category].includes(item.url)) {
-                            currentLevel[category].push(item.url);
-                        }
-                    } else {
-                        // Intermediate category node
-                        if (!currentLevel[category]) currentLevel[category] = {};
-                        currentLevel = currentLevel[category];
-                    }
-                });
-            });
-             console.log("Built Tree:", tree); // For debugging
-            return tree;
-        }
-
-        // --- Tree Rendering Logic ---
-        function renderTree(treeData, containerElement) {
-            containerElement.innerHTML = ''; // Clear previous tree
-
-            if (Object.keys(treeData).length === 0) {
-                 containerElement.innerHTML = '<div class="empty-tree">No classification data available to build the tree.</div>';
-                 return;
+            areaElement.innerHTML = '';
+            areaElement.style.display = 'block';
+            const title = document.createElement('strong');
+            title.classList.add('title');
+            const resultOutput = document.createElement('pre');
+            if (isError) {
+                areaElement.classList.add('error');
+                title.textContent = `Error:`;
+                resultOutput.textContent = (typeof data === 'string') ? data : JSON.stringify(data, null, 2);
+            } else {
+                areaElement.classList.remove('error');
+                title.textContent = `${titlePrefix}:`;
+                resultOutput.textContent = JSON.stringify(data, null, 2);
             }
-
-            const rootUl = document.createElement('ul');
-            containerElement.appendChild(rootUl);
-            renderTreeNode(treeData, rootUl); // Start recursion
+            areaElement.appendChild(title);
+            areaElement.appendChild(resultOutput);
         }
 
-        function renderTreeNode(node, parentUl) {
-             // Sort keys for consistent order
-            const categories = Object.keys(node).sort();
-
-            categories.forEach(category => {
-                const li = document.createElement('li');
-                const categoryLabel = document.createElement('span');
-                categoryLabel.classList.add('category-label');
-                categoryLabel.textContent = category;
-                li.appendChild(categoryLabel);
-
-                const childNode = node[category];
-                const nestedUl = document.createElement('ul');
-
-                if (Array.isArray(childNode)) { // Leaf node with URLs
-                    childNode.sort().forEach(url => { // Sort URLs alphabetically
-                        const urlLi = document.createElement('li');
-                        urlLi.classList.add('url-link');
-                        const urlLink = document.createElement('a');
-                        urlLink.href = url;
-                        urlLink.textContent = url;
-                        urlLink.target = '_blank'; // Open in new tab
-                        urlLink.rel = 'noopener noreferrer';
-                        urlLi.appendChild(urlLink);
-                        nestedUl.appendChild(urlLi);
-                    });
-                } else if (typeof childNode === 'object' && childNode !== null) { // Intermediate node
-                    renderTreeNode(childNode, nestedUl); // Recurse
-                }
-
-                li.appendChild(nestedUl); // Append the list of sub-categories or URLs
-                parentUl.appendChild(li); // Append the category item
-            });
+        // Delete an entry from history by id (used by both history list and tree view)
+        function deleteHistoryEntryById(entryId) {
+            classificationHistory = classificationHistory.filter(entry => entry.id !== entryId);
+            saveHistory();
+            renderHistoryList();
+            // Rebuild tree to reflect deletion
+            const treeData = buildUrlTree(classificationHistory);
+            renderTree(treeData, urlTreeContainer);
         }
-
 
         // --- History List Rendering and Management ---
 
         function renderHistoryList() {
             historyList.innerHTML = '';
             if (classificationHistory.length === 0) {
-                 const emptyLi = document.createElement('li');
-                 historyList.appendChild(emptyLi);
+                const emptyLi = document.createElement('li');
+                historyList.appendChild(emptyLi);
                 return;
             }
-            classificationHistory.forEach((item, index) => {
+            classificationHistory.forEach((item) => {
                 const li = document.createElement('li');
                 li.textContent = item.url;
                 li.title = item.url;
-                li.dataset.index = index;
+                li.dataset.id = item.id;
+
+                // Delete button for history entry
+                const delBtn = document.createElement('button');
+                delBtn.classList.add('delete-button');
+                delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                delBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteHistoryEntryById(item.id);
+                });
+
+                li.appendChild(delBtn);
+
                 li.addEventListener('click', () => {
                     document.querySelectorAll('#historyList li.selected').forEach(el => el.classList.remove('selected'));
                     li.classList.add('selected');
-                    const selectedItem = classificationHistory[index];
-                    if (selectedItem?.classification) { // Check if classification exists
-                         displayResultInArea(historyResultDisplay, selectedItem.classification, false, 'Selected History');
+                    if (item.classification) {
+                        displayResultInArea(historyResultDisplay, item.classification, false, 'Selected History');
                     } else {
                         displayResultInArea(historyResultDisplay, "Classification data missing for this entry.", true, 'Selected History');
                     }
                 });
                 historyList.appendChild(li);
             });
-         }
+        }
 
         function loadHistory() {
             try {
@@ -828,32 +782,32 @@
         }
 
         function saveHistory() {
-             try {
-                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(classificationHistory));
-             } catch (error) {
-                 console.error("Error saving history:", error);
-                 displayResultInArea(classifierResultDisplay, "Could not save history (Storage might be full).", true);
-             }
+            try {
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(classificationHistory));
+            } catch (error) {
+                console.error("Error saving history:", error);
+                displayResultInArea(classifierResultDisplay, "Could not save history (Storage might be full).", true);
+            }
         }
 
         function addHistoryEntry(url, classificationData) {
-             const newEntry = { url: url, classification: classificationData };
-             classificationHistory.unshift(newEntry);
-             saveHistory();
-             renderHistoryList(); // Update list view
-             // Re-build and re-render the tree
-             const treeData = buildUrlTree(classificationHistory);
-             renderTree(treeData, urlTreeContainer);
-         }
+            const newEntry = { id: generateId(), url: url, classification: classificationData };
+            classificationHistory.unshift(newEntry);
+            saveHistory();
+            renderHistoryList();
+            // Re-build and re-render the tree
+            const treeData = buildUrlTree(classificationHistory);
+            renderTree(treeData, urlTreeContainer);
+        }
 
         function showAllHistory() {
-             if (classificationHistory.length === 0) {
-                  displayResultInArea(historyResultDisplay, "History is empty.", true, "Full History");
-             } else {
-                 displayResultInArea(historyResultDisplay, classificationHistory, false, "All Stored Classifications");
-             }
-             document.querySelectorAll('#historyList li.selected').forEach(el => el.classList.remove('selected'));
-         }
+            if (classificationHistory.length === 0) {
+                displayResultInArea(historyResultDisplay, "History is empty.", true, "Full History");
+            } else {
+                displayResultInArea(historyResultDisplay, classificationHistory, false, "All Stored Classifications");
+            }
+            document.querySelectorAll('#historyList li.selected').forEach(el => el.classList.remove('selected'));
+        }
 
         function clearHistory() {
             if (confirm("Are you sure you want to clear the entire classification history?")) {
@@ -866,22 +820,156 @@
             }
         }
 
+        // --- Tree Building and Rendering Logic ---
+
+        // Build a tree structure from history.
+        // Instead of just storing the URL as a string, we now store an object {id, url} for leaf nodes.
+        function buildUrlTree(history) {
+            const tree = {}; // Root of the tree
+
+            history.forEach(item => {
+                if (!item.classification) return; // Skip if classification is missing
+                const classification = item.classification.classification;
+                if (!classification) return;
+                const urlType = classification.url_type || 'Unknown Type';
+                const format = classification.content_format || 'Unknown Format';
+                const hierarchy = Array.isArray(classification.content_type_hierarchy) && classification.content_type_hierarchy.length > 0
+                                  ? classification.content_type_hierarchy
+                                  : ['Unknown Category'];
+
+                let currentLevel = tree;
+                // Level 1: URL Type
+                if (!currentLevel[urlType]) currentLevel[urlType] = {};
+                currentLevel = currentLevel[urlType];
+                // Level 2: Content Format
+                if (!currentLevel[format]) currentLevel[format] = {};
+                currentLevel = currentLevel[format];
+                // Levels 3+: Content Type Hierarchy
+                hierarchy.forEach((category, index) => {
+                    const isLastLevel = index === hierarchy.length - 1;
+                    if (isLastLevel) {
+                        if (!currentLevel[category]) currentLevel[category] = [];
+                        // Add the URL entry (object with id and url) if not already present.
+                        if (!currentLevel[category].some(entry => entry.id === item.id)) {
+                            currentLevel[category].push({ id: item.id, url: item.url });
+                        }
+                    } else {
+                        if (!currentLevel[category]) currentLevel[category] = {};
+                        currentLevel = currentLevel[category];
+                    }
+                });
+            });
+            console.log("Built Tree:", tree);
+            return tree;
+        }
+
+        // Render the tree recursively.
+        // Folders (nodes with object children) get a toggle icon that lets the user fold/unfold.
+        // Leaf nodes (array of objects) render each URL with a delete button.
+        function renderTree(treeData, containerElement) {
+            containerElement.innerHTML = ''; // Clear previous tree
+            if (Object.keys(treeData).length === 0) {
+                containerElement.innerHTML = '<div class="empty-tree">No classification data available to build the tree.</div>';
+                return;
+            }
+            const rootUl = document.createElement('ul');
+            containerElement.appendChild(rootUl);
+            renderTreeNode(treeData, rootUl);
+        }
+
+        function renderTreeNode(node, parentUl) {
+            const categories = Object.keys(node).sort();
+            categories.forEach(category => {
+                const li = document.createElement('li');
+                // Create folder header with toggle icon if node is an object (folder)
+                if (typeof node[category] === 'object' && !Array.isArray(node[category])) {
+                    const header = document.createElement('div');
+                    header.classList.add('category-label');
+                    const toggleIcon = document.createElement('i');
+                    toggleIcon.classList.add('toggle-icon', 'fas', 'fa-chevron-down');
+                    // On click, toggle child list visibility
+                    toggleIcon.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (nestedUl.style.display === 'none') {
+                            nestedUl.style.display = 'block';
+                            toggleIcon.classList.replace('fa-chevron-right', 'fa-chevron-down');
+                        } else {
+                            nestedUl.style.display = 'none';
+                            toggleIcon.classList.replace('fa-chevron-down', 'fa-chevron-right');
+                        }
+                    });
+                    header.appendChild(toggleIcon);
+                    const labelSpan = document.createElement('span');
+                    labelSpan.textContent = category;
+                    header.appendChild(labelSpan);
+                    li.appendChild(header);
+                    var nestedUl = document.createElement('ul');
+                    renderTreeNode(node[category], nestedUl);
+                    li.appendChild(nestedUl);
+                } else if (Array.isArray(node[category])) {
+                    // For a leaf folder (array of URL objects)
+                    const header = document.createElement('div');
+                    header.classList.add('category-label');
+                    const toggleIcon = document.createElement('i');
+                    toggleIcon.classList.add('toggle-icon', 'fas', 'fa-chevron-down');
+                    toggleIcon.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (nestedUl.style.display === 'none') {
+                            nestedUl.style.display = 'block';
+                            toggleIcon.classList.replace('fa-chevron-right', 'fa-chevron-down');
+                        } else {
+                            nestedUl.style.display = 'none';
+                            toggleIcon.classList.replace('fa-chevron-down', 'fa-chevron-right');
+                        }
+                    });
+                    header.appendChild(toggleIcon);
+                    const labelSpan = document.createElement('span');
+                    labelSpan.textContent = category;
+                    header.appendChild(labelSpan);
+                    li.appendChild(header);
+                    var nestedUl = document.createElement('ul');
+                    // For each URL object, render URL text plus delete button
+                    node[category].sort((a, b) => a.url.localeCompare(b.url)).forEach(entry => {
+                        const urlLi = document.createElement('li');
+                        urlLi.classList.add('url-link');
+                        const link = document.createElement('a');
+                        link.href = entry.url;
+                        link.textContent = entry.url;
+                        link.target = '_blank';
+                        link.rel = 'noopener noreferrer';
+                        urlLi.appendChild(link);
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.classList.add('delete-button');
+                        deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                        deleteBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            deleteHistoryEntryById(entry.id);
+                        });
+                        urlLi.appendChild(deleteBtn);
+                        nestedUl.appendChild(urlLi);
+                    });
+                    li.appendChild(nestedUl);
+                }
+                parentUl.appendChild(li);
+            });
+        }
+
         // --- Tab Switching Logic ---
         function switchTab(event) {
-             const targetId = event.currentTarget.dataset.target;
-             tabButtons.forEach(button => {
-                 button.classList.toggle('active', button.dataset.target === targetId);
-             });
-             pageContents.forEach(page => {
-                 page.classList.toggle('active', page.id === targetId);
-             });
+            const targetId = event.currentTarget.dataset.target;
+            tabButtons.forEach(button => {
+                button.classList.toggle('active', button.dataset.target === targetId);
+            });
+            pageContents.forEach(page => {
+                page.classList.toggle('active', page.id === targetId);
+            });
         }
 
         // --- Main Classification Function ---
         async function classifyUrlContent() {
             const pageUrl = urlInput.value.trim();
             if (!pageUrl || !/^https?:\/\/.+/.test(pageUrl)) {
-                 displayResultInArea(classifierResultDisplay, "Please enter a valid URL.", true);
+                displayResultInArea(classifierResultDisplay, "Please enter a valid URL.", true);
                 return;
             }
             showLoading(true);
@@ -891,26 +979,26 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ url: pageUrl })
                 });
-                const data = await response.json(); // Expect { classification: { THE_JSON_OBJECT } } or { error: "..." }
+                const data = await response.json();
                 if (!response.ok) {
                     throw new Error(data.error || `Function Error: ${response.status} ${response.statusText}`);
                 }
                 if (data.classification && typeof data.classification === 'object') {
                     displayResultInArea(classifierResultDisplay, data.classification, false, 'API Result');
-                    addHistoryEntry(pageUrl, data.classification); // Pass the actual classification object
+                    addHistoryEntry(pageUrl, data.classification);
                 } else {
-                     throw new Error("Received an unexpected response format.");
+                    throw new Error("Received an unexpected response format.");
                 }
             } catch (error) {
                 console.error("Error during classification:", error);
-                 displayResultInArea(classifierResultDisplay, `Classification failed: ${error.message}`, true);
+                displayResultInArea(classifierResultDisplay, `Classification failed: ${error.message}`, true);
             } finally {
                 showLoading(false);
             }
         }
 
         // --- Initialization and Event Listeners ---
-        loadHistory(); // Load history and render list/tree on startup
+        loadHistory();
         tabButtons.forEach(button => button.addEventListener('click', switchTab));
         classifyButton.addEventListener('click', classifyUrlContent);
         clearHistoryButton.addEventListener('click', clearHistory);
