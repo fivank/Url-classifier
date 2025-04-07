@@ -1,0 +1,14 @@
+{
+    "name": "netlify-url-classifier",
+    "version": "1.0.0",
+    "description": "Fetches and classifies URL using Netlify Function and Gemini (JSON Output)",
+    "main": "index.html",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+      "node-fetch": "^2.6.7"
+    }
+  }
