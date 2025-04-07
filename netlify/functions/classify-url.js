@@ -8,73 +8,14 @@ const MAX_CONTENT_LENGTH = 15000; // Limit content sent to Gemini
 // --- Helper Function: Basic HTML Text Extraction (Keep as is) ---
 function extractTextFromHtml(html) {
     if (!html) return '';
+    // Remove script and style elements and their content
     let text = html.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, '');
     text = text.replace(/<style[^>]*>([\S\s]*?)<\/style>/gmi, '');
+    // Remove remaining HTML tags, leaving content
     text = text.replace(/<[^>]+>/g, ' ');
+    // Replace multiple whitespace characters with a single space and trim
     text = text.replace(/\s+/g, ' ').trim();
     return text;
-}
-
-// --- Utility: Find or create branch using normalized comparisons ---
-function getOrCreateBranch(currentLevel, categoryName, isLast = false) {
-    const normalized = categoryName.trim().toLowerCase();
-    // find a branch key that matches ignoring case
-    for (const key of Object.keys(currentLevel)) {
-        if (key.trim().toLowerCase() === normalized) {
-            return { key, branch: currentLevel[key] };
-        }
-    }
-    // Not found: create a new branch.
-    // For the final level, we want an array to hold entries.
-    const newBranch = isLast ? [] : {};
-    currentLevel[categoryName] = newBranch;
-    return { key: categoryName, branch: newBranch };
-}
-
-// --- Updated Tree Building Function ---
-function buildUrlTree(history) {
-    const tree = {}; // Root of the tree
-
-    history.forEach(item => {
-        if (!item.classification) return;
-        const classification = item.classification;
-        if (!classification) return;
-
-        // Level 1: URL Type
-        const urlType = classification.url_type || 'Unknown Type';
-        const { branch: urlTypeBranch } = getOrCreateBranch(tree, urlType);
-        
-        // Level 2: Content Format — skip if "HTML"
-        let currentLevel = urlTypeBranch;
-        const contentFormat = classification.content_format || 'Unknown Format';
-        if (contentFormat.trim().toLowerCase() !== 'html') {
-            const result = getOrCreateBranch(currentLevel, contentFormat);
-            currentLevel = result.branch;
-        }
-        // Else: if it is HTML, use the existing level without adding a branch.
-
-        // Levels 3+: Content Type Hierarchy
-        const hierarchy = (Array.isArray(classification.content_type_hierarchy) && classification.content_type_hierarchy.length > 0)
-                              ? classification.content_type_hierarchy
-                              : ['Unknown Category'];
-
-        hierarchy.forEach((category, index) => {
-            const isLastLevel = (index === hierarchy.length - 1);
-            if (isLastLevel) {
-                // For leaf level, get the branch (an array) or create if not exists.
-                const { branch: leafBranch } = getOrCreateBranch(currentLevel, category, true);
-                // Add the URL entry object if not already present.
-                if (!leafBranch.some(entry => entry.id === item.id)) {
-                    leafBranch.push({ id: item.id, url: item.url });
-                }
-            } else {
-                const { branch: nextLevel } = getOrCreateBranch(currentLevel, category);
-                currentLevel = nextLevel;
-            }
-        });
-    });
-    console.log("Built Tree:", tree);
-    return tree;
 }
 
 // --- Netlify Function Handler ---
@@ -177,16 +118,21 @@ JSON Output:`;
             rawResultText = geminiData.candidates[0].content.parts[0].text;
             console.log("Raw AI Response Text:\n", rawResultText);
             try {
-                const cleanJsonString = rawResultText
-                    .replace(/^```json\s*/, '')
-                    .replace(/```\s*$/, '')
-                    .trim();
+                // More robust cleaning: handle potential leading/trailing whitespace around ```json ... ```
+                const jsonMatch = rawResultText.match(/```json\s*([\s\S]*?)\s*```/);
+                const cleanJsonString = jsonMatch ? jsonMatch[1].trim() : rawResultText.trim();
                 classificationJson = JSON.parse(cleanJsonString);
                 console.log("Parsed Classification JSON:", classificationJson);
             } catch (parseError) {
                 console.error("Failed to parse JSON from AI response:", parseError);
                 console.error("Problematic raw text:", rawResultText);
-                throw new Error(`AI returned a response, but it was not valid JSON. Response: ${rawResultText.substring(0, 200)}...`);
+                // Try parsing directly if ```json``` wasn't found
+                try {
+                    classificationJson = JSON.parse(rawResultText.trim());
+                    console.log("Parsed Classification JSON (direct parse attempt):", classificationJson);
+                } catch (directParseError) {
+                     throw new Error(`AI returned a response, but it was not valid JSON after cleaning attempts. Response: ${rawResultText.substring(0, 200)}...`);
+                }
             }
         } else if (geminiData.promptFeedback?.blockReason) {
              const blockMessage = `Content blocked by Gemini: ${geminiData.promptFeedback.blockReason}`;

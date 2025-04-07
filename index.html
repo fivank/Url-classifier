@@ -12,8 +12,10 @@
             --primary-dark: #1d4ed8;
             --primary-light: #dbeafe;
             --success: #10b981;
+            --success-dark: #047857;
             --success-light: #d1fae5;
             --danger: #ef4444;
+            --danger-dark: #b91c1c;
             --danger-light: #fee2e2;
             --neutral-50: #f9fafb;
             --neutral-100: #f3f4f6;
@@ -37,33 +39,33 @@
             --radius-lg: 1rem;
         }
 
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        html, body { 
-            height: 100%; 
+        html, body {
+            height: 100%;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6; 
-            background-color: var(--neutral-100); 
+            line-height: 1.6;
+            background-color: var(--neutral-100);
             color: var(--neutral-800);
             padding: 20px;
             font-size: 16px;
         }
 
         .main-wrapper {
-            background-color: #ffffff; 
-            padding: 0; 
+            background-color: #ffffff;
+            padding: 0;
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow-lg);
-            width: 100%; 
+            width: 100%;
             max-width: 900px;
-            margin: 0 auto; 
+            margin: 0 auto;
             overflow: hidden;
             position: relative;
             transition: box-shadow 0.3s ease;
@@ -75,8 +77,8 @@
 
         /* --- Header --- */
         h1 {
-            text-align: center; 
-            font-size: 1.8em; 
+            text-align: center;
+            font-size: 1.8em;
             padding: 1.5rem 0;
             color: var(--primary);
             font-weight: 700;
@@ -85,46 +87,46 @@
             border-bottom: 1px solid var(--neutral-200);
         }
 
-        h2 { 
-            font-size: 1.3em; 
-            margin-bottom: 1rem; 
-            text-align: left; 
+        h2 {
+            font-size: 1.3em;
+            margin-bottom: 1rem;
+            text-align: left;
             color: var(--neutral-800);
             font-weight: 600;
         }
 
         /* --- Tab Navigation --- */
-        .tab-container { 
-            display: flex; 
-            background-color: white; 
-            border-bottom: 1px solid var(--neutral-200); 
+        .tab-container {
+            display: flex;
+            background-color: white;
+            border-bottom: 1px solid var(--neutral-200);
             padding: 0 1rem;
         }
 
         .tab-button {
             padding: 1rem 1.25rem;
-            cursor: pointer; 
-            border: none; 
+            cursor: pointer;
+            border: none;
             background-color: transparent;
-            font-size: 1rem; 
-            font-weight: 500; 
-            color: var(--neutral-600); 
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--neutral-600);
             transition: all 0.2s ease;
-            border-bottom: 3px solid transparent; 
+            border-bottom: 3px solid transparent;
             position: relative;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .tab-button:hover { 
-            color: var(--primary); 
+        .tab-button:hover {
+            color: var(--primary);
             background-color: var(--neutral-50);
         }
 
-        .tab-button.active { 
-            color: var(--primary); 
-            border-bottom: 3px solid var(--primary); 
+        .tab-button.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
         }
 
         .tab-button.active::after {
@@ -143,14 +145,14 @@
         }
 
         /* --- Page Content --- */
-        .page-content { 
-            display: none; 
-            padding: 2rem; 
+        .page-content {
+            display: none;
+            padding: 2rem;
             animation: fadeIn 0.3s ease;
         }
 
-        .page-content.active { 
-            display: block; 
+        .page-content.active {
+            display: block;
         }
 
         @keyframes fadeIn {
@@ -159,33 +161,33 @@
         }
 
         /* --- Form Elements --- */
-        .form-group { 
-            margin-bottom: 1.5rem; 
-            text-align: left; 
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
         }
 
-        label { 
-            display: block; 
-            margin-bottom: 0.5rem; 
-            font-weight: 500; 
-            color: var(--neutral-700); 
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--neutral-700);
             font-size: 0.95rem;
         }
 
-        input[type="url"] {
-            width: 100%; 
+        input[type="url"], input[type="text"].rename-input {
+            width: 100%;
             padding: 0.75rem 1rem;
-            border: 1px solid var(--neutral-300); 
+            border: 1px solid var(--neutral-300);
             border-radius: var(--radius);
-            font-size: 1rem; 
+            font-size: 1rem;
             font-family: inherit;
             transition: all 0.2s ease;
             background-color: white;
         }
 
-        input[type="url"]:focus { 
-            outline: none; 
-            border-color: var(--primary); 
+        input[type="url"]:focus, input[type="text"].rename-input:focus {
+            outline: none;
+            border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
         }
 
@@ -195,11 +197,11 @@
 
         button {
             background-color: var(--primary);
-            color: white; 
-            border: none; 
+            color: white;
+            border: none;
             padding: 0.75rem 1.25rem;
             border-radius: var(--radius);
-            font-size: 1rem; 
+            font-size: 1rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
@@ -208,216 +210,249 @@
             gap: 0.5rem;
         }
 
-        button:hover { 
+        button:hover {
             background-color: var(--primary-dark);
             transform: translateY(-1px);
         }
 
-        button:active { 
-            transform: translateY(0); 
+        button:active {
+            transform: translateY(0);
         }
 
-        button:disabled { 
-            background-color: var(--neutral-400); 
-            cursor: not-allowed; 
+        button:disabled {
+            background-color: var(--neutral-400);
+            cursor: not-allowed;
             transform: none;
         }
 
-        button#classifyButton { 
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: center; 
-            min-width: 150px; 
-            width: 100%; 
+        button#classifyButton {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 150px;
+            width: 100%;
         }
 
-        /* Style for delete buttons in history and tree */
-        .delete-button {
+        /* Style for delete/action buttons in history and tree */
+        .action-button {
             background: transparent;
             border: none;
-            color: var(--danger);
             cursor: pointer;
+            padding: 0.1rem 0.3rem; /* Smaller padding */
+            font-size: 0.85em; /* Slightly smaller icon */
+            line-height: 1;
+            margin-left: 0.3rem;
+            vertical-align: middle;
         }
-        .delete-button:hover {
-            color: var(--danger-dark);
+        .action-button.delete-button { color: var(--danger); }
+        .action-button.delete-button:hover { color: var(--danger-dark); }
+        .action-button.rename-icon { color: var(--neutral-500); }
+        .action-button.rename-icon:hover { color: var(--primary); }
+        .action-button.save-rename { color: var(--success); }
+        .action-button.save-rename:hover { color: var(--success-dark); }
+        .action-button.cancel-rename { color: var(--neutral-600); }
+        .action-button.cancel-rename:hover { color: var(--neutral-800); }
+
+        /* Container for inline rename controls */
+        .rename-controls {
+            display: inline-flex; /* Changed from flex to inline-flex */
+            align-items: center;
+            gap: 0.5rem;
+            width: calc(100% - 30px); /* Adjust width as needed */
+            margin-left: 0.5rem; /* Add some space */
         }
+        .rename-controls input.rename-input {
+            flex-grow: 1;
+            font-size: 0.9em; /* Match surrounding text */
+            padding: 0.3rem 0.5rem; /* Smaller padding */
+            /* Remove width: 100% */
+        }
+        .rename-controls .action-button {
+             margin-left: 0.1rem; /* Reduce margin */
+        }
+
 
         /* --- Loader --- */
         .loader {
-            border: 3px solid rgba(255,255,255,0.3); 
-            border-top: 3px solid white; 
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
             border-radius: 50%;
-            width: 18px; 
-            height: 18px; 
+            width: 18px;
+            height: 18px;
             animation: spin 1s linear infinite;
             display: none;
         }
 
-        @keyframes spin { 
-            0% { transform: rotate(0deg); } 
-            100% { transform: rotate(360deg); } 
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         /* --- Info Boxes --- */
-        .info { 
-            background-color: var(--info-light); 
-            color: var(--info-dark); 
+        .info {
+            background-color: var(--info-light);
+            color: var(--info-dark);
             border-left: 4px solid var(--primary);
-            padding: 1rem; 
-            border-radius: var(--radius-sm); 
-            margin-bottom: 1.5rem; 
-            text-align: left; 
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1.5rem;
+            text-align: left;
             font-size: 0.95rem;
         }
 
         /* --- Result Display --- */
         .result-display-area {
-            margin-top: 1.5rem; 
+            margin-top: 1.5rem;
             padding: 1.5rem;
             background-color: white;
             border-radius: var(--radius);
             border: 1px solid var(--neutral-200);
             text-align: left;
-            word-wrap: break-word; 
-            display: none; 
-            font-size: 0.95em; 
+            word-wrap: break-word;
+            display: none;
+            font-size: 0.95em;
             min-height: 100px;
             box-shadow: var(--shadow-sm);
             transition: all 0.3s ease;
         }
 
-        .result-display-area.error { 
-            background-color: var(--danger-light); 
-            color: var(--danger); 
+        .result-display-area.error {
+            background-color: var(--danger-light);
+            color: var(--danger);
             border-left: 4px solid var(--danger);
         }
 
-        .result-display-area strong.title { 
-            display: block; 
+        .result-display-area strong.title {
+            display: block;
             margin-bottom: 0.75rem;
-            color: var(--primary); 
-            font-weight: 600; 
+            color: var(--primary);
+            font-weight: 600;
             font-size: 1.1rem;
             border-bottom: 1px solid var(--neutral-200);
             padding-bottom: 0.75rem;
         }
 
-        .result-display-area.error strong.title { 
-            color: var(--danger); 
+        .result-display-area.error strong.title {
+            color: var(--danger);
         }
 
         .result-display-area pre {
-            background-color: var(--neutral-50); 
-            padding: 1rem; 
+            background-color: var(--neutral-50);
+            padding: 1rem;
             border-radius: var(--radius-sm);
-            border: 1px solid var(--neutral-200); 
+            border: 1px solid var(--neutral-200);
             font-family: Monaco, Menlo, Consolas, "Liberation Mono", monospace;
             white-space: pre-wrap;
-            word-break: break-all; 
-            font-size: 0.9rem; 
-            margin: 0; 
+            word-break: break-all;
+            font-size: 0.9rem;
+            margin: 0;
             color: var(--neutral-800);
             overflow-x: auto;
             max-height: 400px;
             overflow-y: auto;
         }
 
-        .result-display-area.error pre { 
-            color: var(--danger); 
-            background-color: transparent; 
-            border: none; 
-            padding: 0; 
-            white-space: pre-wrap; 
-            font-family: inherit; 
-            font-size: 1em; 
+        .result-display-area.error pre {
+            color: var(--danger);
+            background-color: transparent;
+            border: none;
+            padding: 0;
+            white-space: pre-wrap;
+            font-family: inherit;
+            font-size: 1em;
         }
 
         /* --- History List --- */
-        #historyList { 
-            list-style: none; 
-            padding: 0; 
-            max-height: 300px; 
-            overflow-y: auto; 
+        #historyList {
+            list-style: none;
+            padding: 0;
+            max-height: 300px;
+            overflow-y: auto;
             border: 1px solid var(--neutral-200);
             border-radius: var(--radius);
             margin-bottom: 1rem;
             background-color: white;
         }
 
-        #historyList li { 
+        #historyList li {
             padding: 0.75rem 1rem;
             border-bottom: 1px solid var(--neutral-200);
-            cursor: pointer; 
+            cursor: pointer;
             font-size: 0.9rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             transition: background-color 0.2s ease;
             color: var(--neutral-700);
         }
 
-        #historyList li:last-child { 
-            border-bottom: none; 
+        #historyList li:last-child {
+            border-bottom: none;
         }
 
-        #historyList li:hover { 
+        #historyList li:hover {
             background-color: var(--neutral-100);
         }
 
-        #historyList li.selected { 
+        #historyList li.selected {
             background-color: var(--primary-light);
             color: var(--primary-dark);
             font-weight: 500;
             border-left: 4px solid var(--primary);
         }
 
-        #historyList li:empty::after { 
-            content: "No history yet."; 
-            font-style: italic; 
-            color: var(--neutral-500); 
-            display: block; 
-            text-align: center; 
-            padding: 1.25rem; 
+        #historyList li:empty::after {
+            content: "No history yet.";
+            font-style: italic;
+            color: var(--neutral-500);
+            display: block;
+            text-align: center;
+            padding: 1.25rem;
+        }
+        /* Ensure delete button aligns correctly in list */
+        #historyList .action-button.delete-button {
+            margin-left: auto; /* Push delete button to the right */
+            padding-left: 0.5rem; /* Add some space */
         }
 
         /* --- History Actions --- */
-        .history-actions { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+        .history-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 1.5rem;
             gap: 0.75rem;
         }
 
-        .history-actions button { 
-            margin-top: 0; 
+        .history-actions button {
+            margin-top: 0;
             padding: 0.75rem 1rem;
             font-size: 0.9rem;
             flex-shrink: 0;
         }
 
-        #showAllButton { 
+        #showAllButton {
             background-color: var(--success);
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        #showAllButton:hover { 
+        #showAllButton:hover {
             background-color: #0d9488;
         }
 
-        #clearHistoryButton { 
-            background-color: var(--danger); 
+        #clearHistoryButton {
+            background-color: var(--danger);
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        #clearHistoryButton:hover { 
+        #clearHistoryButton:hover {
             background-color: #b91c1c;
         }
 
@@ -448,13 +483,16 @@
         .toggle-icon {
             cursor: pointer;
             margin-right: 0.5rem;
+            width: 1em; /* Ensure consistent width */
+            display: inline-block;
+            text-align: center;
         }
 
         #urlTreeContainer li::before {
             content: "";
             position: absolute;
             left: -1rem;
-            top: 0.7rem;
+            top: 0.7rem; /* Adjust if needed */
             width: 0.5rem;
             height: 0;
             border-top: 1px solid var(--neutral-300);
@@ -470,23 +508,35 @@
         }
 
         #urlTreeContainer ul > li:last-child::after {
-            height: 0.7rem;
+            height: 0.7rem; /* Adjust vertical line height for last item */
         }
 
         /* Style for category labels */
         #urlTreeContainer .category-label {
             font-weight: 600;
             color: var(--neutral-700);
-            display: inline-flex;
+            display: inline-flex; /* Use inline-flex to allow items side-by-side */
             align-items: center;
             margin-bottom: 0.3rem;
             padding: 0.25rem 0;
+            position: relative; /* Needed for positioning rename controls */
+            width: 100%; /* Take full width to contain inline elements */
+        }
+        #urlTreeContainer .category-label > .label-text {
+             margin-right: 5px; /* Space between text and rename icon */
         }
 
+
         #urlTreeContainer .category-label::before {
-            content: "\f07b"; /* folder icon */
-            font-family: "Font Awesome 6 Free";
-            font-weight: 900;
+            /* Using Font Awesome via class now, so remove this pseudo-element */
+            /* content: "\f07b"; */
+            /* font-family: "Font Awesome 6 Free"; */
+            /* font-weight: 900; */
+            /* margin-right: 0.5rem; */
+            /* color: var(--primary); */
+        }
+         /* Add folder icon using FA class */
+        #urlTreeContainer .category-label .folder-icon {
             margin-right: 0.5rem;
             color: var(--primary);
         }
@@ -506,6 +556,7 @@
             font-size: 0.9rem;
             display: inline-flex;
             align-items: center;
+            margin-right: 5px; /* Space before delete button */
         }
 
         #urlTreeContainer .url-link a::before {
@@ -528,14 +579,23 @@
             padding: 2rem;
         }
 
+        /* Hidden utility class */
+        .hidden {
+            display: none !important;
+        }
+
         /* --- Responsive Styles --- */
         @media (max-width: 768px) {
             .main-wrapper {
                 border-radius: var(--radius);
             }
-            
+
             .page-content {
                 padding: 1.25rem;
+            }
+            #urlTreeContainer .category-label,
+            #urlTreeContainer .url-link a {
+                 max-width: calc(100% - 40px); /* Prevent overlap with buttons */
             }
         }
 
@@ -548,39 +608,47 @@
                 font-size: 1.5rem;
                 padding: 1rem 0;
             }
-            
-            .tab-button { 
-                padding: 0.75rem 0.5rem; 
-                font-size: 0.85rem; 
+
+            .tab-button {
+                padding: 0.75rem 0.5rem;
+                font-size: 0.85rem;
             }
-            
+
             .tab-container {
                 padding: 0;
             }
-            
+
             .tab-button i {
                 margin-right: 0;
             }
-            
+
             .tab-button span {
                 display: none;
             }
-            
-            .history-actions { 
-                flex-direction: column; 
+
+            .history-actions {
+                flex-direction: column;
             }
-            
-            .history-actions button { 
-                width: 100%; 
+
+            .history-actions button {
+                width: 100%;
             }
-            
-            #urlTreeContainer ul { 
-                padding-left: 1rem; 
+
+            #urlTreeContainer ul {
+                padding-left: 1rem;
             }
 
             .result-display-area pre {
                 font-size: 0.8rem;
             }
+             /* Adjust rename controls for small screens */
+            .rename-controls {
+                width: calc(100% - 20px); /* Ensure it fits */
+            }
+             #urlTreeContainer .category-label,
+             #urlTreeContainer .url-link a {
+                  max-width: calc(100% - 50px); /* More aggressive on small screens */
+             }
         }
     </style>
 </head>
@@ -626,7 +694,7 @@
         <!-- History Page Content -->
         <div id="historyPage" class="page-content">
             <h2>Classification History List</h2>
-            <ul id="historyList"><li></li></ul>
+            <ul id="historyList"><li></li></ul> <!-- Initial empty li placeholder handled by JS -->
             <div class="history-actions">
                 <button id="showAllButton">
                     <i class="fas fa-list"></i>
@@ -647,7 +715,7 @@
         <div id="treePage" class="page-content">
             <h2>URL Classification Tree</h2>
             <div class="info">
-                <i class="fas fa-circle-info"></i> URLs are categorized based on their classification facets. Click a folder to fold/unfold, and click the delete icon to remove an entry.
+                <i class="fas fa-circle-info"></i> URLs are categorized. Click <i class="fas fa-chevron-down"></i>/<i class="fas fa-chevron-right"></i> to fold/unfold. Click <i class="fas fa-pencil-alt"></i> to rename a category. Click <i class="fas fa-trash-alt"></i> to remove a URL entry.
             </div>
             <div id="urlTreeContainer">
                 <!-- Tree will be rendered here by JavaScript -->
@@ -680,7 +748,7 @@
 
         // --- Helper: Generate Unique ID ---
         function generateId() {
-            return Date.now() + Math.random().toString(16).slice(2);
+            return Date.now().toString(36) + Math.random().toString(36).substring(2);
         }
 
         // --- Functions ---
@@ -700,7 +768,7 @@
         }
 
         function displayResultInArea(areaElement, data, isError = false, titlePrefix = 'Result') {
-            areaElement.innerHTML = '';
+            areaElement.innerHTML = ''; // Clear previous content
             areaElement.style.display = 'block';
             const title = document.createElement('strong');
             title.classList.add('title');
@@ -720,47 +788,72 @@
 
         // Delete an entry from history by id (used by both history list and tree view)
         function deleteHistoryEntryById(entryId) {
+            const initialLength = classificationHistory.length;
             classificationHistory = classificationHistory.filter(entry => entry.id !== entryId);
-            saveHistory();
-            renderHistoryList();
-            // Rebuild tree to reflect deletion
-            const treeData = buildUrlTree(classificationHistory);
-            renderTree(treeData, urlTreeContainer);
+            if (classificationHistory.length < initialLength) {
+                saveHistory();
+                renderHistoryList();
+                // Rebuild tree to reflect deletion
+                const treeData = buildUrlTree(classificationHistory);
+                renderTree(treeData, urlTreeContainer);
+                 // Hide history display if the deleted item was selected
+                 historyResultDisplay.style.display = 'none';
+                 document.querySelectorAll('#historyList li.selected').forEach(el => el.classList.remove('selected'));
+                 console.log(`Deleted history entry ${entryId}`);
+            } else {
+                console.warn(`Attempted to delete non-existent entry ${entryId}`);
+            }
         }
 
         // --- History List Rendering and Management ---
 
         function renderHistoryList() {
-            historyList.innerHTML = '';
+            historyList.innerHTML = ''; // Clear previous list
             if (classificationHistory.length === 0) {
                 const emptyLi = document.createElement('li');
+                emptyLi.textContent = "No history yet.";
+                emptyLi.style.fontStyle = "italic";
+                emptyLi.style.color = "var(--neutral-500)";
+                emptyLi.style.textAlign = "center";
+                emptyLi.style.cursor = "default";
                 historyList.appendChild(emptyLi);
                 return;
             }
+            // Sort history by most recent first (optional, assuming IDs are time-based)
+            // const sortedHistory = [...classificationHistory].sort((a, b) => (b.id < a.id ? -1 : 1));
+
             classificationHistory.forEach((item) => {
                 const li = document.createElement('li');
-                li.textContent = item.url;
-                li.title = item.url;
+                const textSpan = document.createElement('span'); // Span for text content
+                textSpan.textContent = item.url;
+                textSpan.style.overflow = 'hidden';
+                textSpan.style.textOverflow = 'ellipsis';
+                textSpan.style.whiteSpace = 'nowrap';
+                textSpan.title = item.url; // Tooltip for full URL
+                li.appendChild(textSpan);
+
                 li.dataset.id = item.id;
 
                 // Delete button for history entry
                 const delBtn = document.createElement('button');
-                delBtn.classList.add('delete-button');
+                delBtn.classList.add('action-button', 'delete-button');
                 delBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                delBtn.title = "Delete this entry"; // Tooltip
                 delBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
+                    e.stopPropagation(); // Prevent li click event
                     deleteHistoryEntryById(item.id);
                 });
 
-                li.appendChild(delBtn);
+                li.appendChild(delBtn); // Append delete button
 
                 li.addEventListener('click', () => {
+                    // Don't select if clicking the delete button (already handled by stopPropagation)
                     document.querySelectorAll('#historyList li.selected').forEach(el => el.classList.remove('selected'));
                     li.classList.add('selected');
                     if (item.classification) {
-                        displayResultInArea(historyResultDisplay, item.classification, false, 'Selected History');
+                        displayResultInArea(historyResultDisplay, item.classification, false, `Selected: ${item.url}`);
                     } else {
-                        displayResultInArea(historyResultDisplay, "Classification data missing for this entry.", true, 'Selected History');
+                        displayResultInArea(historyResultDisplay, "Classification data missing for this entry.", true, `Selected: ${item.url}`);
                     }
                 });
                 historyList.appendChild(li);
@@ -771,6 +864,12 @@
             try {
                 const storedHistory = localStorage.getItem(LOCAL_STORAGE_KEY);
                 classificationHistory = storedHistory ? JSON.parse(storedHistory) : [];
+                 // Basic validation: ensure it's an array
+                 if (!Array.isArray(classificationHistory)) {
+                     console.warn("Stored history was not an array, resetting.");
+                     classificationHistory = [];
+                     localStorage.removeItem(LOCAL_STORAGE_KEY); // Clear invalid data
+                 }
             } catch (error) {
                 console.error("Error loading/parsing history:", error);
                 classificationHistory = [];
@@ -791,8 +890,9 @@
         }
 
         function addHistoryEntry(url, classificationData) {
+            // Optional: Check if URL already exists and update instead? For now, just add.
             const newEntry = { id: generateId(), url: url, classification: classificationData };
-            classificationHistory.unshift(newEntry);
+            classificationHistory.unshift(newEntry); // Add to the beginning
             saveHistory();
             renderHistoryList();
             // Re-build and re-render the tree
@@ -804,13 +904,15 @@
             if (classificationHistory.length === 0) {
                 displayResultInArea(historyResultDisplay, "History is empty.", true, "Full History");
             } else {
-                displayResultInArea(historyResultDisplay, classificationHistory, false, "All Stored Classifications");
+                // Display a copy to avoid showing the internal `id` unnecessarily to the user if desired
+                 const displayHistory = classificationHistory.map(({ id, ...rest }) => rest);
+                 displayResultInArea(historyResultDisplay, displayHistory, false, "All Stored Classifications");
             }
             document.querySelectorAll('#historyList li.selected').forEach(el => el.classList.remove('selected'));
         }
 
         function clearHistory() {
-            if (confirm("Are you sure you want to clear the entire classification history?")) {
+            if (confirm("Are you sure you want to clear the entire classification history? This cannot be undone.")) {
                 classificationHistory = [];
                 saveHistory();
                 renderHistoryList();
@@ -820,17 +922,29 @@
             }
         }
 
+
         // --- Tree Building and Rendering Logic ---
 
-        // Build a tree structure from history.
-        // Instead of just storing the URL as a string, we now store an object {id, url} for leaf nodes.
+        // Helper to safely get nested properties
+        const get = (obj, path, defaultValue = undefined) => {
+          const travel = (regexp) =>
+            String.prototype.split
+              .call(path, regexp)
+              .filter(Boolean)
+              .reduce((res, key) => (res !== null && res !== undefined ? res[key] : res), obj);
+          const result = travel(/[,[\]]+?/) || travel(/[,[\].]+?/);
+          return result === undefined || result === obj ? defaultValue : result;
+        };
+
+
         function buildUrlTree(history) {
             const tree = {}; // Root of the tree
 
             history.forEach(item => {
-                if (!item.classification) return; // Skip if classification is missing
-                const classification = item.classification.classification;
-                if (!classification) return;
+                const classification = get(item, 'classification.classification'); // Use safe getter
+                if (!classification) return; // Skip if classification structure is missing
+
+                // Ensure default values if properties are missing
                 const urlType = classification.url_type || 'Unknown Type';
                 const format = classification.content_format || 'Unknown Format';
                 const hierarchy = Array.isArray(classification.content_type_hierarchy) && classification.content_type_hierarchy.length > 0
@@ -838,34 +952,52 @@
                                   : ['Unknown Category'];
 
                 let currentLevel = tree;
+
                 // Level 1: URL Type
                 if (!currentLevel[urlType]) currentLevel[urlType] = {};
                 currentLevel = currentLevel[urlType];
-                // Level 2: Content Format
-                if (!currentLevel[format]) currentLevel[format] = {};
-                currentLevel = currentLevel[format];
+
+                // Level 2: Content Format (Conditional based on 'HTML')
+                let formatKey = format;
+                 // Always add the format level unless it's exactly 'HTML' (case-insensitive check)
+                 if (format.trim().toLowerCase() !== 'html') {
+                     if (!currentLevel[formatKey]) currentLevel[formatKey] = {};
+                     currentLevel = currentLevel[formatKey];
+                 }
+                 // If it IS 'HTML', currentLevel remains the urlTypeBranch, effectively skipping the 'HTML' node visually
+
+
                 // Levels 3+: Content Type Hierarchy
                 hierarchy.forEach((category, index) => {
                     const isLastLevel = index === hierarchy.length - 1;
+                    if (!currentLevel[category]) {
+                         // Create an array for the last level, object for intermediate
+                         currentLevel[category] = isLastLevel ? [] : {};
+                    }
+
                     if (isLastLevel) {
-                        if (!currentLevel[category]) currentLevel[category] = [];
-                        // Add the URL entry (object with id and url) if not already present.
-                        if (!currentLevel[category].some(entry => entry.id === item.id)) {
-                            currentLevel[category].push({ id: item.id, url: item.url });
-                        }
+                        // Ensure it's an array (might have been object previously if hierarchy changed)
+                         if (!Array.isArray(currentLevel[category])) {
+                             currentLevel[category] = [];
+                         }
+                         // Add the URL entry (object with id and url) if not already present.
+                         if (!currentLevel[category].some(entry => entry.id === item.id)) {
+                             currentLevel[category].push({ id: item.id, url: item.url });
+                         }
                     } else {
-                        if (!currentLevel[category]) currentLevel[category] = {};
-                        currentLevel = currentLevel[category];
+                         // Ensure it's an object (might have been array previously if hierarchy changed)
+                         if (typeof currentLevel[category] !== 'object' || Array.isArray(currentLevel[category])) {
+                              currentLevel[category] = {};
+                         }
+                         currentLevel = currentLevel[category];
                     }
                 });
             });
-            console.log("Built Tree:", tree);
+            // console.log("Built Tree:", JSON.stringify(tree, null, 2)); // Detailed log if needed
             return tree;
         }
 
         // Render the tree recursively.
-        // Folders (nodes with object children) get a toggle icon that lets the user fold/unfold.
-        // Leaf nodes (array of objects) render each URL with a delete button.
         function renderTree(treeData, containerElement) {
             containerElement.innerHTML = ''; // Clear previous tree
             if (Object.keys(treeData).length === 0) {
@@ -874,84 +1006,338 @@
             }
             const rootUl = document.createElement('ul');
             containerElement.appendChild(rootUl);
-            renderTreeNode(treeData, rootUl);
+            // Start rendering from the root, with an empty initial path
+            renderTreeNode(treeData, rootUl, []);
         }
 
-        function renderTreeNode(node, parentUl) {
+        // Modified renderTreeNode to include path tracking and rename elements
+        function renderTreeNode(node, parentUl, currentPath) {
             const categories = Object.keys(node).sort();
+
             categories.forEach(category => {
                 const li = document.createElement('li');
-                // Create folder header with toggle icon if node is an object (folder)
-                if (typeof node[category] === 'object' && !Array.isArray(node[category])) {
-                    const header = document.createElement('div');
-                    header.classList.add('category-label');
-                    const toggleIcon = document.createElement('i');
-                    toggleIcon.classList.add('toggle-icon', 'fas', 'fa-chevron-down');
-                    // On click, toggle child list visibility
-                    toggleIcon.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        if (nestedUl.style.display === 'none') {
-                            nestedUl.style.display = 'block';
-                            toggleIcon.classList.replace('fa-chevron-right', 'fa-chevron-down');
-                        } else {
-                            nestedUl.style.display = 'none';
-                            toggleIcon.classList.replace('fa-chevron-down', 'fa-chevron-right');
-                        }
-                    });
-                    header.appendChild(toggleIcon);
-                    const labelSpan = document.createElement('span');
-                    labelSpan.textContent = category;
-                    header.appendChild(labelSpan);
-                    li.appendChild(header);
-                    var nestedUl = document.createElement('ul');
-                    renderTreeNode(node[category], nestedUl);
-                    li.appendChild(nestedUl);
-                } else if (Array.isArray(node[category])) {
-                    // For a leaf folder (array of URL objects)
-                    const header = document.createElement('div');
-                    header.classList.add('category-label');
-                    const toggleIcon = document.createElement('i');
-                    toggleIcon.classList.add('toggle-icon', 'fas', 'fa-chevron-down');
-                    toggleIcon.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        if (nestedUl.style.display === 'none') {
-                            nestedUl.style.display = 'block';
-                            toggleIcon.classList.replace('fa-chevron-right', 'fa-chevron-down');
-                        } else {
-                            nestedUl.style.display = 'none';
-                            toggleIcon.classList.replace('fa-chevron-down', 'fa-chevron-right');
-                        }
-                    });
-                    header.appendChild(toggleIcon);
-                    const labelSpan = document.createElement('span');
-                    labelSpan.textContent = category;
-                    header.appendChild(labelSpan);
-                    li.appendChild(header);
-                    var nestedUl = document.createElement('ul');
-                    // For each URL object, render URL text plus delete button
-                    node[category].sort((a, b) => a.url.localeCompare(b.url)).forEach(entry => {
-                        const urlLi = document.createElement('li');
-                        urlLi.classList.add('url-link');
-                        const link = document.createElement('a');
-                        link.href = entry.url;
-                        link.textContent = entry.url;
-                        link.target = '_blank';
-                        link.rel = 'noopener noreferrer';
-                        urlLi.appendChild(link);
-                        const deleteBtn = document.createElement('button');
-                        deleteBtn.classList.add('delete-button');
-                        deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
-                        deleteBtn.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            deleteHistoryEntryById(entry.id);
+                const nodeValue = node[category];
+                const isFolder = typeof nodeValue === 'object' && !Array.isArray(nodeValue);
+                const isLeafList = Array.isArray(nodeValue); // List of URL entries
+
+                // --- Create Header (for folders and leaf lists) ---
+                const header = document.createElement('div');
+                header.classList.add('category-label'); // Common class for styling
+
+                // Toggle Icon (always present for folders/leaf lists)
+                const toggleIcon = document.createElement('i');
+                toggleIcon.classList.add('toggle-icon', 'fas', 'fa-chevron-down'); // Default open
+
+                // Folder/File Icon & Label Text Span
+                const iconSpan = document.createElement('i');
+                const labelSpan = document.createElement('span');
+                labelSpan.classList.add('label-text');
+                labelSpan.textContent = category;
+
+                if (isFolder || isLeafList) {
+                    iconSpan.classList.add('fas', 'fa-folder', 'folder-icon'); // Folder icon for categories
+                }
+                // else { // This case shouldn't happen with the current build logic
+                //    iconSpan.classList.add('fas', 'fa-file', 'file-icon'); // File icon (if we had single items not in arrays)
+                // }
+
+                header.appendChild(toggleIcon);
+                header.appendChild(iconSpan);
+                header.appendChild(labelSpan);
+
+                // --- Add Rename Icon (only for actual category folders/leaf lists) ---
+                 if (isFolder || isLeafList) {
+                     const renameIcon = document.createElement('button');
+                     renameIcon.classList.add('action-button', 'rename-icon');
+                     renameIcon.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+                     renameIcon.title = `Rename category "${category}"`;
+                     // Store data needed for renaming
+                     renameIcon.dataset.categoryName = category;
+                     // Store the full path to *this* category node
+                     renameIcon.dataset.fullPath = JSON.stringify([...currentPath, category]);
+                     header.appendChild(renameIcon);
+                 }
+
+
+                li.appendChild(header);
+
+                // --- Create Nested List (ul) for Children ---
+                let nestedUl = null;
+                if (isFolder || isLeafList) {
+                    nestedUl = document.createElement('ul');
+                    if (isFolder) {
+                        // Recursively render child categories, extending the path
+                        renderTreeNode(nodeValue, nestedUl, [...currentPath, category]);
+                    } else { // isLeafList
+                        // Sort URLs alphabetically
+                        nodeValue.sort((a, b) => a.url.localeCompare(b.url)).forEach(entry => {
+                            const urlLi = document.createElement('li');
+                            urlLi.classList.add('url-link');
+
+                            const link = document.createElement('a');
+                            link.href = entry.url;
+                            link.textContent = entry.url;
+                            link.title = entry.url;
+                            link.target = '_blank';
+                            link.rel = 'noopener noreferrer';
+                            urlLi.appendChild(link);
+
+                            const deleteBtn = document.createElement('button');
+                            deleteBtn.classList.add('action-button', 'delete-button');
+                            deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                            deleteBtn.title = "Delete this URL entry";
+                            deleteBtn.dataset.entryId = entry.id; // Store ID for deletion
+                            deleteBtn.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                deleteHistoryEntryById(entry.id);
+                            });
+                            urlLi.appendChild(deleteBtn);
+                            nestedUl.appendChild(urlLi);
                         });
-                        urlLi.appendChild(deleteBtn);
-                        nestedUl.appendChild(urlLi);
-                    });
-                    li.appendChild(nestedUl);
+                    }
+                     li.appendChild(nestedUl);
+
+                     // --- Toggle Functionality ---
+                     toggleIcon.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const isHidden = nestedUl.style.display === 'none';
+                        nestedUl.style.display = isHidden ? 'block' : 'none';
+                        toggleIcon.classList.replace(
+                            isHidden ? 'fa-chevron-right' : 'fa-chevron-down',
+                            isHidden ? 'fa-chevron-down' : 'fa-chevron-right'
+                        );
+                     });
                 }
                 parentUl.appendChild(li);
             });
+        }
+
+
+        // --- Rename Category Logic ---
+
+        function showRenameInput(renameIcon) {
+            const headerDiv = renameIcon.closest('.category-label');
+            const labelSpan = headerDiv.querySelector('.label-text');
+            const oldName = renameIcon.dataset.categoryName;
+
+            // Hide original label and rename icon
+            labelSpan.classList.add('hidden');
+            renameIcon.classList.add('hidden');
+
+            // Create input field
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = oldName;
+            input.classList.add('rename-input');
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    handleRenameSave(input);
+                } else if (e.key === 'Escape') {
+                    handleRenameCancel(input);
+                }
+            });
+
+            // Create Save button
+            const saveBtn = document.createElement('button');
+            saveBtn.classList.add('action-button', 'save-rename');
+            saveBtn.innerHTML = '<i class="fas fa-check"></i>';
+            saveBtn.title = 'Save new name';
+            saveBtn.addEventListener('click', () => handleRenameSave(input));
+
+            // Create Cancel button
+            const cancelBtn = document.createElement('button');
+            cancelBtn.classList.add('action-button', 'cancel-rename');
+            cancelBtn.innerHTML = '<i class="fas fa-times"></i>';
+            cancelBtn.title = 'Cancel rename';
+            cancelBtn.addEventListener('click', () => handleRenameCancel(input));
+
+            // Add controls container
+            const controls = document.createElement('div');
+            controls.classList.add('rename-controls');
+            controls.appendChild(input);
+            controls.appendChild(saveBtn);
+            controls.appendChild(cancelBtn);
+
+            // Insert controls after the folder icon
+            headerDiv.insertBefore(controls, labelSpan); // Insert before the (now hidden) label
+            input.focus();
+            input.select();
+        }
+
+        function handleRenameSave(inputElement) {
+            const controlsDiv = inputElement.closest('.rename-controls');
+            const headerDiv = controlsDiv.closest('.category-label');
+            const renameIcon = headerDiv.querySelector('.rename-icon'); // Find original icon to get data
+            const oldName = renameIcon.dataset.categoryName;
+            const fullPathString = renameIcon.dataset.fullPath;
+            const newName = inputElement.value.trim();
+
+            if (newName && newName !== oldName) {
+                 try {
+                     const fullPath = JSON.parse(fullPathString);
+                     if (renameCategoryInData(fullPath, oldName, newName)) {
+                        // Success: Data updated, history saved, tree will be re-rendered
+                        console.log(`Renamed category "${oldName}" at path [${fullPath.join('/')}] to "${newName}"`);
+                        // Re-render the tree immediately
+                        const treeData = buildUrlTree(classificationHistory);
+                        renderTree(treeData, urlTreeContainer);
+                        // No need to manually remove controls, re-render handles it.
+                     } else {
+                        // Failed to update data (shouldn't normally happen if path is correct)
+                        console.error("Failed to rename category in data.");
+                        // Restore UI in case of failure
+                        handleRenameCancel(inputElement);
+                     }
+                 } catch (e) {
+                     console.error("Error parsing path or renaming:", e);
+                     handleRenameCancel(inputElement); // Restore UI on error
+                 }
+            } else {
+                // No change or empty name, treat as cancel
+                handleRenameCancel(inputElement);
+            }
+        }
+
+        function handleRenameCancel(inputElement) {
+            const controlsDiv = inputElement.closest('.rename-controls');
+            const headerDiv = controlsDiv.closest('.category-label');
+            const labelSpan = headerDiv.querySelector('.label-text');
+            const renameIcon = headerDiv.querySelector('.rename-icon');
+
+            // Remove rename controls
+            controlsDiv.remove();
+
+            // Show original label and icon
+            labelSpan.classList.remove('hidden');
+            renameIcon.classList.remove('hidden');
+        }
+
+        // Updates classificationHistory based on rename operation
+        // Returns true if any changes were made, false otherwise.
+        function renameCategoryInData(fullPath, oldName, newName) {
+            if (!fullPath || fullPath.length === 0 || !oldName || !newName || oldName === newName) {
+                console.warn("Rename aborted: Invalid parameters.");
+                return false;
+            }
+
+            let changesMade = false;
+            const pathLength = fullPath.length;
+
+            // Path structure: [url_type, (optional) format, hierarchy_part1, hierarchy_part2, ...]
+            const urlTypePath = fullPath[0];
+            let formatPath = null;
+            let hierarchyStartIndex = 1; // Index where hierarchy starts in fullPath
+
+             // Determine if format is part of the path (exists and is not 'html' case-insensitive)
+             if (pathLength > 1) {
+                  const potentialFormat = fullPath[1];
+                  // Check against original history data format, not just the path segment
+                  // This requires knowing if the *original* format was HTML or not.
+                  // Simpler: Assume path reflects visual tree. If path has 2+ elements
+                  // AND the 2nd element doesn't correspond to the start of hierarchy for
+                  // items classified as 'HTML', then the 2nd element IS the format.
+                  // Let's refine based on how buildUrlTree works:
+                  // The path passed *always* includes the category name itself.
+                  // The path *won't* include 'HTML' if that was skipped visually.
+                  // So, we need to compare against the *actual* history data.
+
+                  // Let's iterate history and check consistency
+                  const firstItemMatch = classificationHistory.find(item => {
+                      const classification = get(item, 'classification.classification');
+                      return classification && classification.url_type === urlTypePath;
+                  });
+
+                 if (firstItemMatch) {
+                      const itemFormat = get(firstItemMatch, 'classification.classification.content_format', '').trim().toLowerCase();
+                      if (itemFormat !== 'html' && fullPath.length > 1 && get(firstItemMatch, 'classification.classification.content_format') === fullPath[1]) {
+                          // The second path element IS the format (and it's not HTML)
+                          formatPath = fullPath[1];
+                          hierarchyStartIndex = 2;
+                      } else if (itemFormat === 'html') {
+                           // The format in data is HTML (so it was skipped in the tree path)
+                           formatPath = 'HTML'; // We know the expected format for matching
+                           hierarchyStartIndex = 1; // Hierarchy starts at index 1 in path
+                      } else {
+                           // Format is not HTML, but wasn't the 2nd path element (e.g., only url_type and hierarchy)
+                           formatPath = get(firstItemMatch, 'classification.classification.content_format'); // Use actual format for matching
+                           hierarchyStartIndex = 1; // Hierarchy starts at index 1
+                      }
+                 } else {
+                     // No matching items found? Can't determine format context. Abort.
+                      console.warn("Rename aborted: Cannot determine context, no items match URL type.");
+                      return false;
+                 }
+
+             } else {
+                 // Path only has url_type, renaming the url_type itself.
+                 hierarchyStartIndex = -1; // Indicate we're renaming url_type
+             }
+
+
+            const targetHierarchyPath = fullPath.slice(hierarchyStartIndex);
+            const renameLevelIndex = targetHierarchyPath.length - 1; // Index within the *hierarchy array*
+
+            classificationHistory.forEach(item => {
+                const classification = get(item, 'classification.classification');
+                if (!classification) return;
+
+                const itemUrlType = classification.url_type || 'Unknown Type';
+                const itemFormat = classification.content_format || 'Unknown Format';
+                const itemHierarchy = Array.isArray(classification.content_type_hierarchy)
+                                      ? [...classification.content_type_hierarchy] // Operate on a copy
+                                      : ['Unknown Category'];
+
+                let match = false;
+
+                // Match URL Type
+                if (itemUrlType === urlTypePath) {
+                    // If renaming url_type itself (hierarchyStartIndex is -1)
+                    if (hierarchyStartIndex === -1 && oldName === urlTypePath) {
+                         classification.url_type = newName;
+                         changesMade = true;
+                         match = true; // Mark as matched for this item
+                    }
+                    // Match Format (if applicable)
+                    else if (formatPath === null || itemFormat === formatPath) {
+                         // Match Hierarchy Path up to the rename level
+                         if (renameLevelIndex >= 0 && itemHierarchy.length > renameLevelIndex) {
+                             let prefixMatch = true;
+                             for (let i = 0; i < renameLevelIndex; i++) {
+                                 if (itemHierarchy[i] !== targetHierarchyPath[i]) {
+                                     prefixMatch = false;
+                                     break;
+                                 }
+                             }
+                              // Check the actual segment being renamed
+                             if (prefixMatch && itemHierarchy[renameLevelIndex] === oldName) {
+                                 itemHierarchy[renameLevelIndex] = newName;
+                                 classification.content_type_hierarchy = itemHierarchy; // Update the original object
+                                 changesMade = true;
+                                 match = true; // Mark as matched
+                             }
+                         }
+                    }
+                     // Check if renaming the format itself
+                     else if (formatPath !== null && hierarchyStartIndex === 2 && renameLevelIndex === -1 && oldName === itemFormat) {
+                         // This case occurs if the path was [urlType, formatName]
+                         classification.content_format = newName;
+                         changesMade = true;
+                         match = true;
+                     }
+                }
+
+                // if (match) {
+                //     console.log(`Updated item ${item.id} (${item.url})`);
+                // }
+            });
+
+            if (changesMade) {
+                saveHistory(); // Persist changes
+            } else {
+                 console.warn("Rename function executed, but no matching history entries were found or modified for path:", fullPath);
+            }
+
+            return changesMade;
         }
 
         // --- Tab Switching Logic ---
@@ -963,13 +1349,18 @@
             pageContents.forEach(page => {
                 page.classList.toggle('active', page.id === targetId);
             });
+            // Optionally re-render tree if switching to that tab, in case data changed externally
+             if (targetId === 'treePage') {
+                 const treeData = buildUrlTree(classificationHistory);
+                 renderTree(treeData, urlTreeContainer);
+             }
         }
 
         // --- Main Classification Function ---
         async function classifyUrlContent() {
             const pageUrl = urlInput.value.trim();
             if (!pageUrl || !/^https?:\/\/.+/.test(pageUrl)) {
-                displayResultInArea(classifierResultDisplay, "Please enter a valid URL.", true);
+                displayResultInArea(classifierResultDisplay, "Please enter a valid URL (starting with http:// or https://).", true);
                 return;
             }
             showLoading(true);
@@ -979,18 +1370,25 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ url: pageUrl })
                 });
-                const data = await response.json();
+                const data = await response.json(); // Always parse JSON first
+
                 if (!response.ok) {
+                    // Use error message from JSON if available, otherwise status text
                     throw new Error(data.error || `Function Error: ${response.status} ${response.statusText}`);
                 }
-                if (data.classification && typeof data.classification === 'object') {
+
+                // Check if the expected structure is present
+                if (data.classification && typeof data.classification === 'object' && data.classification.classification) {
                     displayResultInArea(classifierResultDisplay, data.classification, false, 'API Result');
-                    addHistoryEntry(pageUrl, data.classification);
+                    addHistoryEntry(pageUrl, data.classification); // Save the whole object returned
                 } else {
-                    throw new Error("Received an unexpected response format.");
+                     // Got a 200 OK, but the content wasn't as expected
+                     console.warn("Received unexpected response format:", data);
+                     throw new Error("Received an unexpected response format from the classification service.");
                 }
             } catch (error) {
                 console.error("Error during classification:", error);
+                // Display specific error from fetch/function or a generic one
                 displayResultInArea(classifierResultDisplay, `Classification failed: ${error.message}`, true);
             } finally {
                 showLoading(false);
@@ -998,16 +1396,44 @@
         }
 
         // --- Initialization and Event Listeners ---
-        loadHistory();
-        tabButtons.forEach(button => button.addEventListener('click', switchTab));
-        classifyButton.addEventListener('click', classifyUrlContent);
-        clearHistoryButton.addEventListener('click', clearHistory);
-        showAllButton.addEventListener('click', showAllHistory);
-        urlInput.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter') { event.preventDefault(); classifyUrlContent(); }
+        document.addEventListener('DOMContentLoaded', () => {
+            loadHistory(); // Load data when the page is ready
+
+            // Tab switching
+            tabButtons.forEach(button => button.addEventListener('click', switchTab));
+
+            // Classifier action
+            classifyButton.addEventListener('click', classifyUrlContent);
+            urlInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    classifyUrlContent();
+                }
+            });
+
+            // History actions
+            clearHistoryButton.addEventListener('click', clearHistory);
+            showAllButton.addEventListener('click', showAllHistory);
+
+            // Event delegation for tree actions (rename)
+            urlTreeContainer.addEventListener('click', (event) => {
+                 // Handle Rename Icon Clicks
+                 const renameIcon = event.target.closest('.rename-icon');
+                 if (renameIcon) {
+                      event.stopPropagation(); // Prevent other clicks if needed
+                      showRenameInput(renameIcon);
+                      return; // Stop processing here
+                 }
+
+                 // Note: Delete button clicks inside the tree are handled directly
+                 // on the button elements during renderTreeNode, no delegation needed here.
+            });
+
+            // Ensure default tab content is shown (redundant if HTML has `active` class, but safe)
+            document.querySelector('.page-content.active') || document.getElementById('classifierPage').classList.add('active');
+            document.querySelector('.tab-button.active') || document.querySelector('.tab-button[data-target="classifierPage"]').classList.add('active');
         });
-        // Ensure default tab is active
-        document.getElementById('classifierPage').classList.add('active');
+
     </script>
 </body>
 </html>
