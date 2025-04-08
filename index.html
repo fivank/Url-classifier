@@ -135,6 +135,224 @@
         @media (max-width: 768px) { .main-wrapper { border-radius: var(--radius); } .page-content { padding: 1.25rem; } #urlTreeContainer .category-label > .label-text { max-width: calc(100% - 120px); /* Adjusted for 3 buttons */ overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; } #urlTreeContainer .url-link a { max-width: calc(100% - 40px); } }
         @media (max-width: 600px) { body { padding: 10px; } h1 { font-size: 1.5rem; padding: 1rem 0; } .tab-button { padding: 0.75rem 0.5rem; font-size: 0.85rem; } .tab-container { padding: 0; } .tab-button i { margin-right: 0; } .tab-button span { display: none; } .history-actions { flex-direction: column; } .history-actions button { width: 100%; } #urlTreeContainer ul { padding-left: 1rem; } .result-display-area pre { font-size: 0.8rem; } .rename-controls { width: calc(100% - 20px); } #urlTreeContainer .category-label > .label-text { max-width: calc(100% - 140px); /* Adjusted */ } #urlTreeContainer .url-link a { max-width: calc(100% - 50px); } }
 
+        /* Folder View Styles */
+        .folder-breadcrumb {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            background-color: var(--neutral-50);
+            border-radius: var(--radius);
+            padding: 0;
+            border: 1px solid var(--neutral-200);
+            overflow: hidden;
+        }
+
+        .back-button {
+            background-color: var(--neutral-100);
+            border: none;
+            border-right: 1px solid var(--neutral-200);
+            padding: 0.6rem 1rem;
+            cursor: pointer;
+            color: var(--neutral-600);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .back-button:hover {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+        }
+
+        .breadcrumb-container {
+            display: flex;
+            align-items: center;
+            padding: 0.6rem 1rem;
+            overflow-x: auto;
+            white-space: nowrap;
+            flex-grow: 1;
+            scrollbar-width: thin;
+        }
+
+        .breadcrumb-home {
+            color: var(--neutral-600);
+            cursor: pointer;
+            margin-right: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .breadcrumb-home:hover {
+            color: var(--primary);
+        }
+
+        .breadcrumb-path {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .breadcrumb-item {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .breadcrumb-separator {
+            margin: 0 0.5rem;
+            color: var(--neutral-400);
+        }
+
+        .breadcrumb-link {
+            color: var(--primary);
+            cursor: pointer;
+        }
+
+        .breadcrumb-link:hover {
+            text-decoration: underline;
+        }
+
+        .folders-title {
+            margin: 1rem 0 1.5rem;
+            color: var(--neutral-800);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .folders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1.2rem;
+        }
+
+        .folder-item, .url-item {
+            background-color: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem 1rem;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--neutral-200);
+            height: 160px;
+        }
+
+        .folder-item:hover, .url-item:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .folder-item:hover {
+            background-color: var(--primary-light);
+            border-color: var(--primary);
+        }
+
+        .url-item:hover {
+            background-color: var(--info-light);
+            border-color: var(--primary);
+        }
+
+        .item-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            transition: all 0.2s ease;
+        }
+
+        .folder-item:hover .item-icon {
+            transform: scale(1.1);
+        }
+
+        .url-item:hover .item-icon {
+            transform: scale(1.1);
+        }
+
+        .item-favicon {
+            width: 40px;
+            height: 40px;
+            object-fit: contain;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            background-color: white;
+            padding: 4px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+        }
+
+        .url-item:hover .item-favicon {
+            transform: scale(1.1);
+            box-shadow: var(--shadow);
+        }
+
+        .item-name {
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-align: center;
+            color: var(--neutral-700);
+            margin: 0;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .folders-empty {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--neutral-500);
+        }
+
+        .folders-empty i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .folders-empty p {
+            font-size: 1rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .folders-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 1rem;
+            }
+            
+            .folder-item, .url-item {
+                height: 140px;
+                padding: 1rem;
+            }
+            
+            .item-icon, .item-favicon {
+                font-size: 2rem;
+                width: 36px;
+                height: 36px;
+                margin-bottom: 0.75rem;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .folders-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .folder-item, .url-item {
+                height: 120px;
+            }
+            
+            .breadcrumb-container {
+                padding: 0.5rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -185,12 +403,22 @@
 
         <!-- Folders Page Content -->
         <div id="foldersPage" class="page-content">
-            <div id="foldersHeader" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                <button id="foldersBackButton" style="display:none; padding: 0.5rem 1rem; border: none; border-radius: var(--radius); background-color: var(--neutral-300); cursor: pointer;">Back</button>
-                <h2 id="foldersTitle">Folders</h2>
+            <div id="foldersBreadcrumb" class="folder-breadcrumb">
+                <button id="foldersBackButton" class="back-button">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="breadcrumb-container">
+                    <span class="breadcrumb-home"><i class="fas fa-home"></i></span>
+                    <div id="breadcrumbPath" class="breadcrumb-path"></div>
+                </div>
             </div>
-            <div id="foldersGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+            <h2 id="foldersTitle" class="folders-title">Folders</h2>
+            <div id="foldersGrid" class="folders-grid">
                 <!-- Grid items will be rendered here -->
+            </div>
+            <div id="foldersEmpty" class="folders-empty hidden">
+                <i class="fas fa-folder-open"></i>
+                <p>No items in this folder</p>
             </div>
         </div>
 
@@ -738,56 +966,137 @@
                     currentNode = null;
                 }
             });
+            
             // Set header title and back button visibility
             const foldersTitle = document.getElementById('foldersTitle');
             foldersTitle.textContent = currentFolderPath.length > 0 ? currentFolderPath[currentFolderPath.length - 1] : 'Folders';
             const backButton = document.getElementById('foldersBackButton');
-            backButton.style.display = currentFolderPath.length > 0 ? 'inline-block' : 'none';
+            backButton.style.display = currentFolderPath.length > 0 ? 'flex' : 'none';
+            
+            // Render breadcrumb
+            renderBreadcrumb();
             
             // Clear grid container
             const grid = document.getElementById('foldersGrid');
             grid.innerHTML = '';
+            
+            const emptyState = document.getElementById('foldersEmpty');
 
             if (!currentNode) {
-                grid.innerHTML = '<div>No folders or items available.</div>';
+                emptyState.classList.remove('hidden');
+                grid.classList.add('hidden');
                 return;
             }
+            
+            emptyState.classList.add('hidden');
+            grid.classList.remove('hidden');
+            
+            // Count how many items we'll show
+            const folders = Object.keys(currentNode).filter(key => key !== '_meta' && key !== '_items');
+            const items = currentNode._items?.filter(item => !item.id.startsWith(DUMMY_ITEM_PREFIX)) || [];
+            
+            if (folders.length === 0 && items.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            
             // Render folder boxes (child categories)
-            Object.keys(currentNode).forEach(key => {
-                if (key === '_meta' || key === '_items') return;
+            folders.forEach(key => {
                 const folderBox = document.createElement('div');
-                folderBox.style.padding = '1rem';
-                folderBox.style.border = '1px solid var(--neutral-200)';
-                folderBox.style.borderRadius = 'var(--radius)';
-                folderBox.style.textAlign = 'center';
-                folderBox.style.cursor = 'pointer';
-                folderBox.style.backgroundColor = 'var(--neutral-50)';
-                folderBox.innerHTML = `<i class="fas fa-folder" style="font-size:1.5rem;margin-bottom:0.5rem;"></i><br>${key}`;
+                folderBox.className = 'folder-item';
+                folderBox.innerHTML = `
+                    <i class="fas fa-folder item-icon"></i>
+                    <p class="item-name">${key}</p>
+                `;
                 folderBox.addEventListener('click', () => {
                     currentFolderPath.push(key);
                     renderFoldersView();
                 });
                 grid.appendChild(folderBox);
             });
+            
             // Render URL links if available (_items array)
             if (currentNode._items && Array.isArray(currentNode._items)) {
                 currentNode._items
-                    .filter(item => !item.id.startsWith('${DUMMY_ITEM_PREFIX}'))
+                    .filter(item => !item.id.startsWith(DUMMY_ITEM_PREFIX))
                     .forEach(item => {
                         const urlBox = document.createElement('div');
-                        urlBox.style.padding = '1rem';
-                        urlBox.style.border = '1px solid var(--neutral-200)';
-                        urlBox.style.borderRadius = 'var(--radius)';
-                        urlBox.style.textAlign = 'center';
-                        urlBox.style.cursor = 'pointer';
-                        urlBox.style.backgroundColor = 'var(--neutral-100)';
-                        urlBox.innerHTML = `<i class="fas fa-link" style="font-size:1.5rem;margin-bottom:0.5rem;"></i><br>${new URL(item.url).hostname}`;
+                        urlBox.className = 'url-item';
+                        
+                        // Try to get domain and favicon
+                        try {
+                            const urlObj = new URL(item.url);
+                            const domain = urlObj.hostname;
+                            const shortDomain = domain.replace(/^www\./, '');
+                            const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+                            
+                            urlBox.innerHTML = `
+                                <img src="${faviconUrl}" class="item-favicon" alt="${shortDomain} icon">
+                                <p class="item-name">${shortDomain}</p>
+                            `;
+                        } catch (e) {
+                            urlBox.innerHTML = `
+                                <i class="fas fa-link item-icon"></i>
+                                <p class="item-name">${item.url}</p>
+                            `;
+                        }
+                        
                         urlBox.addEventListener('click', () => {
                             window.open(item.url, '_blank');
                         });
                         grid.appendChild(urlBox);
                     });
             }
+        }
+
+        // Function to render breadcrumb navigation
+        function renderBreadcrumb() {
+            const breadcrumbPath = document.getElementById('breadcrumbPath');
+            breadcrumbPath.innerHTML = '';
+            
+            // Home icon already in HTML
+            document.querySelector('.breadcrumb-home').addEventListener('click', () => {
+                currentFolderPath = [];
+                renderFoldersView();
+            });
+            
+            if (currentFolderPath.length === 0) return;
+            
+            // Add separator after home
+            const firstSeparator = document.createElement('span');
+            firstSeparator.className = 'breadcrumb-separator';
+            firstSeparator.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            breadcrumbPath.appendChild(firstSeparator);
+            
+            // Add each path item
+            currentFolderPath.forEach((folder, index) => {
+                const isLast = index === currentFolderPath.length - 1;
+                
+                const itemSpan = document.createElement('span');
+                itemSpan.className = 'breadcrumb-item';
+                
+                if (isLast) {
+                    // Current folder is just text
+                    itemSpan.innerHTML = `<span class="breadcrumb-current">${folder}</span>`;
+                } else {
+                    // Parent folders are clickable
+                    itemSpan.innerHTML = `<span class="breadcrumb-link">${folder}</span>`;
+                    itemSpan.addEventListener('click', () => {
+                        // Navigate to this level by slicing the path
+                        currentFolderPath = currentFolderPath.slice(0, index + 1);
+                        renderFoldersView();
+                    });
+                }
+                
+                breadcrumbPath.appendChild(itemSpan);
+                
+                if (!isLast) {
+                    const separator = document.createElement('span');
+                    separator.className = 'breadcrumb-separator';
+                    separator.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                    breadcrumbPath.appendChild(separator);
+                }
+            });
         }
 
         // NEW: Back button handler for Folders view
