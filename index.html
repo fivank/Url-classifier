@@ -146,6 +146,7 @@
             <button class="tab-button active" data-target="classifierPage"> <i class="fas fa-magnifying-glass"></i> <span>Classifier</span> </button>
             <button class="tab-button" data-target="historyPage"> <i class="fas fa-clock-rotate-left"></i> <span>History</span> </button>
             <button class="tab-button" data-target="treePage"> <i class="fas fa-sitemap"></i> <span>URL Tree</span> </button>
+            <button class="tab-button" data-target="foldersPage"> <i class="fas fa-folder"></i> <span>Folders</span> </button>
         </div>
 
         <!-- Classifier Page Content -->
@@ -182,6 +183,17 @@
             </div>
         </div>
 
+        <!-- Folders Page Content -->
+        <div id="foldersPage" class="page-content">
+            <div id="foldersHeader" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                <button id="foldersBackButton" style="display:none; padding: 0.5rem 1rem; border: none; border-radius: var(--radius); background-color: var(--neutral-300); cursor: pointer;">Back</button>
+                <h2 id="foldersTitle">Folders</h2>
+            </div>
+            <div id="foldersGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                <!-- Grid items will be rendered here -->
+            </div>
+        </div>
+
     </div> <!-- End main-wrapper -->
 
     <script>
@@ -211,6 +223,9 @@
         // --- State ---
         let classificationHistory = [];
         let draggedElement = null;
+
+        // NEW: Global variable for Folders view
+        let currentFolderPath = [];
 
         // --- Helper: Generate Unique ID ---
         function generateId(isDummy = false) { /* ... no changes ... */
@@ -711,10 +726,96 @@
              const { urlType, format, hierarchy } = targetPath; let finalHierarchy = [...hierarchy]; const matchingItemsIndices = []; const matchingItemsKeywords = []; history.forEach((item, index) => { if (item.id.startsWith(DUMMY_ITEM_PREFIX)) return; const itemClass = get(item, 'classification.classification'); if (itemClass && (itemClass.url_type || 'Unknown Type') === urlType && (itemClass.content_format || 'Unknown Format') === format && Array.isArray(itemClass.content_type_hierarchy) && itemClass.content_type_hierarchy.length === hierarchy.length && itemClass.content_type_hierarchy.every((h, i) => h === hierarchy[i])) { matchingItemsIndices.push(index); matchingItemsKeywords.push(...(itemClass.keywords || [])); } }); const currentCount = matchingItemsIndices.length; const totalCount = currentCount + 1; console.log(`Checking subcategorization for path [${urlType}/${format}]/[${hierarchy.join('/')}]: ${currentCount} existing + 1 new = ${totalCount}. Threshold: ${MAX_ITEMS_PER_CATEGORY}`); if (totalCount >= MAX_ITEMS_PER_CATEGORY) { console.log("Threshold met, attempting subcategorization..."); const allKeywords = [...matchingItemsKeywords, ...newItemKeywords]; const keywordCounts = {}; allKeywords.forEach(kw => { if (typeof kw === 'string') { const cleanedKw = kw.trim().toLowerCase(); if (cleanedKw.length >= MIN_KEYWORD_LENGTH && !STOP_WORDS.has(cleanedKw)) { keywordCounts[cleanedKw] = (keywordCounts[cleanedKw] || 0) + 1; } } }); let bestKeyword = null; let maxCount = 0; for (const [kw, count] of Object.entries(keywordCounts)) { if (count > maxCount && count > 1) { maxCount = count; bestKeyword = kw; } } if (!bestKeyword && Object.keys(keywordCounts).length > 0) { for (const [kw, count] of Object.entries(keywordCounts)) { if (count > maxCount) { maxCount = count; bestKeyword = kw; } } } if (bestKeyword) { const subCategoryName = bestKeyword.charAt(0).toUpperCase() + bestKeyword.slice(1); const newHierarchy = [...hierarchy, subCategoryName]; console.log(`Found subcategory keyword: "${subCategoryName}". New hierarchy:`, newHierarchy); matchingItemsIndices.forEach(index => { const itemToModify = classificationHistory[index]; if (itemToModify && itemToModify.classification && itemToModify.classification.classification) { itemToModify.classification.classification.content_type_hierarchy = [...newHierarchy]; console.log(`Updated existing item ${itemToModify.id} to new subcategory.`); } }); finalHierarchy = newHierarchy; } else { console.log("Could not determine a suitable keyword for subcategorization."); finalHierarchy = hierarchy; } } return finalHierarchy;
         }
 
+        // --- Render Folders view (read-only) ---
+        function renderFoldersView() {
+            const treeData = buildUrlTree(classificationHistory);
+            // Traverse tree using currentFolderPath
+            let currentNode = treeData;
+            currentFolderPath.forEach(folderName => {
+                if(currentNode && currentNode[folderName]){
+                    currentNode = currentNode[folderName];
+                } else {
+                    currentNode = null;
+                }
+            });
+            // Set header title and back button visibility
+            const foldersTitle = document.getElementById('foldersTitle');
+            foldersTitle.textContent = currentFolderPath.length > 0 ? currentFolderPath[currentFolderPath.length - 1] : 'Folders';
+            const backButton = document.getElementById('foldersBackButton');
+            backButton.style.display = currentFolderPath.length > 0 ? 'inline-block' : 'none';
+            
+            // Clear grid container
+            const grid = document.getElementById('foldersGrid');
+            grid.innerHTML = '';
+
+            if (!currentNode) {
+                grid.innerHTML = '<div>No folders or items available.</div>';
+                return;
+            }
+            // Render folder boxes (child categories)
+            Object.keys(currentNode).forEach(key => {
+                if (key === '_meta' || key === '_items') return;
+                const folderBox = document.createElement('div');
+                folderBox.style.padding = '1rem';
+                folderBox.style.border = '1px solid var(--neutral-200)';
+                folderBox.style.borderRadius = 'var(--radius)';
+                folderBox.style.textAlign = 'center';
+                folderBox.style.cursor = 'pointer';
+                folderBox.style.backgroundColor = 'var(--neutral-50)';
+                folderBox.innerHTML = `<i class="fas fa-folder" style="font-size:1.5rem;margin-bottom:0.5rem;"></i><br>${key}`;
+                folderBox.addEventListener('click', () => {
+                    currentFolderPath.push(key);
+                    renderFoldersView();
+                });
+                grid.appendChild(folderBox);
+            });
+            // Render URL links if available (_items array)
+            if (currentNode._items && Array.isArray(currentNode._items)) {
+                currentNode._items
+                    .filter(item => !item.id.startsWith('${DUMMY_ITEM_PREFIX}'))
+                    .forEach(item => {
+                        const urlBox = document.createElement('div');
+                        urlBox.style.padding = '1rem';
+                        urlBox.style.border = '1px solid var(--neutral-200)';
+                        urlBox.style.borderRadius = 'var(--radius)';
+                        urlBox.style.textAlign = 'center';
+                        urlBox.style.cursor = 'pointer';
+                        urlBox.style.backgroundColor = 'var(--neutral-100)';
+                        urlBox.innerHTML = `<i class="fas fa-link" style="font-size:1.5rem;margin-bottom:0.5rem;"></i><br>${new URL(item.url).hostname}`;
+                        urlBox.addEventListener('click', () => {
+                            window.open(item.url, '_blank');
+                        });
+                        grid.appendChild(urlBox);
+                    });
+            }
+        }
+
+        // NEW: Back button handler for Folders view
+        document.getElementById('foldersBackButton').addEventListener('click', () => {
+            if (currentFolderPath.length > 0) {
+                currentFolderPath.pop();
+                renderFoldersView();
+            }
+        });
 
         // --- Tab Switching Logic ---
-        function switchTab(event) { /* ... no changes ... */
-              if (draggedElement) { draggedElement.classList.remove('dragging'); draggedElement = null; } document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over')); const targetId = event.currentTarget.dataset.target; tabButtons.forEach(button => { button.classList.toggle('active', button.dataset.target === targetId); }); pageContents.forEach(page => { page.classList.toggle('active', page.id === targetId); }); if (targetId === 'treePage') { const treeData = buildUrlTree(classificationHistory); renderTree(treeData, urlTreeContainer); }
+        function switchTab(event) {
+            if (draggedElement) { draggedElement.classList.remove('dragging'); draggedElement = null; }
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            const targetId = event.currentTarget.dataset.target;
+            tabButtons.forEach(button => {
+                button.classList.toggle('active', button.dataset.target === targetId);
+            });
+            pageContents.forEach(page => {
+                page.classList.toggle('active', page.id === targetId);
+            });
+            if (targetId === 'treePage') {
+                const treeData = buildUrlTree(classificationHistory);
+                renderTree(treeData, urlTreeContainer);
+            } else if (targetId === 'foldersPage') {
+                currentFolderPath = []; // Reset to top-level when switching
+                renderFoldersView();
+            }
         }
 
         // --- Main Classification Function ---
