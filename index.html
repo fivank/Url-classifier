@@ -470,7 +470,7 @@
                 // --- Left side: Toggle, Folder Icon, Label ---
                 const toggleIcon = document.createElement('i');
                 if (isFolder || items.length > 0) {
-                   toggleIcon.classList.add('toggle-icon', 'fas', 'fa-chevron-down');
+                   toggleIcon.classList.add('toggle-icon', 'fas', 'fa-chevron-right');
                 } else {
                    toggleIcon.classList.add('toggle-icon', 'fas', 'fa-minus');
                    toggleIcon.style.opacity = '0.3';
@@ -526,7 +526,7 @@
                 let nestedUl = null;
                 if (isFolder || items.length > 0) {
                     nestedUl = document.createElement('ul');
-
+                    nestedUl.style.display = 'none';
                     if (isFolder) {
                         renderTreeNode(nodeValue, nestedUl);
                     }
@@ -578,17 +578,26 @@
                          });
                      li.appendChild(nestedUl);
 
-                     if (toggleIcon.classList.contains('toggle-icon')) {
-                         toggleIcon.addEventListener('click', (e) => {
-                             e.stopPropagation();
-                             const isHidden = nestedUl.style.display === 'none';
-                             nestedUl.style.display = isHidden ? 'block' : 'none';
-                             toggleIcon.classList.replace(
-                                 isHidden ? 'fa-chevron-right' : 'fa-chevron-down',
-                                 isHidden ? 'fa-chevron-down' : 'fa-chevron-right'
-                             );
-                         });
-                     }
+                     const toggle = () => {
+                         const isHidden = nestedUl.style.display === 'none';
+                         nestedUl.style.display = isHidden ? 'block' : 'none';
+                         if (isHidden) {
+                             toggleIcon.classList.replace('fa-chevron-right', 'fa-chevron-down');
+                         } else {
+                             toggleIcon.classList.replace('fa-chevron-down', 'fa-chevron-right');
+                         }
+                     };
+
+                     toggleIcon.addEventListener('click', (e) => {
+                         e.stopPropagation();
+                         toggle();
+                     });
+
+                     labelSpan.style.cursor = 'pointer';
+                     labelSpan.addEventListener('click', (e) => {
+                         e.stopPropagation();
+                         toggle();
+                     });
                  }
                  parentUl.appendChild(li);
             });
