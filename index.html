@@ -534,28 +534,48 @@
                     items.filter(item => !item.id.startsWith(DUMMY_ITEM_PREFIX))
                          .sort((a, b) => a.url.localeCompare(b.url))
                          .forEach(entry => {
-                            const urlLi = document.createElement('li');
-                            urlLi.classList.add('url-link');
-                            urlLi.draggable = true;
-                            urlLi.dataset.entryId = entry.id;
-                            const link = document.createElement('a');
-                            link.href = entry.url;
-                            link.textContent = entry.url;
-                            link.title = entry.url;
-                            link.target = '_blank';
-                            link.rel = 'noopener noreferrer';
-                            urlLi.appendChild(link);
-                            const deleteBtn = document.createElement('button');
-                            deleteBtn.classList.add('action-button', 'delete-button');
-                            deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
-                            deleteBtn.title = "Delete this URL entry";
-                            deleteBtn.addEventListener('click', (e) => {
-                                e.stopPropagation();
-                                deleteHistoryEntryById(entry.id);
-                            });
-                            urlLi.appendChild(deleteBtn);
-                            nestedUl.appendChild(urlLi);
-                        });
+                             const urlLi = document.createElement('li');
+                             urlLi.classList.add('url-link');
+                             urlLi.draggable = true;
+                             urlLi.dataset.entryId = entry.id;
+                             const link = document.createElement('a');
+                             link.href = entry.url;
+                             link.target = '_blank';
+                             link.rel = 'noopener noreferrer';
+                             // Try to extract hostname and use a friendly name/icon
+                             try {
+                                 const urlObj = new URL(entry.url);
+                                 const domain = urlObj.hostname;
+                                 // Optional: use a mapping to give a friendlier name
+                                 const friendlyNames = {
+                                     "www.amazon.com": "Kindle",
+                                     "amazon.com": "Kindle"
+                                     // add more mappings if needed...
+                                 };
+                                 const displayName = friendlyNames[domain] || domain;
+                                 // Use a favicon service to get the icon (Google’s favicon API)
+                                 const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}`;
+                                 // Set title to show full url on hover
+                                 link.title = entry.url;
+                                 // Build the link content: an image followed by display text
+                                 link.innerHTML = `<img src="${faviconUrl}" alt="icon" style="vertical-align:middle; margin-right:4px;"> <span>${displayName}</span>`;
+                             } catch (e) {
+                                 // Fallback if URL parsing fails
+                                 link.textContent = entry.url;
+                                 link.title = entry.url;
+                             }
+                             urlLi.appendChild(link);
+                             const deleteBtn = document.createElement('button');
+                             deleteBtn.classList.add('action-button', 'delete-button');
+                             deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                             deleteBtn.title = "Delete this URL entry";
+                             deleteBtn.addEventListener('click', (e) => {
+                                 e.stopPropagation();
+                                 deleteHistoryEntryById(entry.id);
+                             });
+                             urlLi.appendChild(deleteBtn);
+                             nestedUl.appendChild(urlLi);
+                         });
                      li.appendChild(nestedUl);
 
                      if (toggleIcon.classList.contains('toggle-icon')) {
