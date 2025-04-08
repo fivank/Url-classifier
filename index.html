@@ -121,9 +121,15 @@
         #urlTreeContainer .category-label .folder-icon { margin-right: 0.5rem; color: var(--primary); }
         #urlTreeContainer .url-link { display: flex; justify-content: space-between; align-items: center; padding: 0.25rem 0.5rem; border-radius: var(--radius-sm); transition: opacity 0.2s ease; cursor: grab; }
         #urlTreeContainer .url-link.dragging { opacity: 0.5; cursor: grabbing; background-color: var(--neutral-200); }
-        #urlTreeContainer .url-link a { pointer-events: none; }
-        #urlTreeContainer .url-link a { color: var(--primary); text-decoration: none; word-break: break-all; font-size: 0.9rem; display: inline-flex; align-items: center; margin-right: 5px; }
-        #urlTreeContainer .url-link a::before { content: "\f0c1"; font-family: "Font Awesome 6 Free"; font-weight: 900; margin-right: 0.5rem; font-size: 0.8rem; color: var(--neutral-500); }
+        #urlTreeContainer .url-link a {
+            color: var(--primary);
+            text-decoration: none;
+            word-break: break-all;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            margin-right: 5px;
+        }
         #urlTreeContainer .empty-tree { font-style: italic; color: var(--neutral-500); text-align: center; padding: 2rem; }
         .hidden { display: none !important; }
         @media (max-width: 768px) { .main-wrapper { border-radius: var(--radius); } .page-content { padding: 1.25rem; } #urlTreeContainer .category-label > .label-text { max-width: calc(100% - 120px); /* Adjusted for 3 buttons */ overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; } #urlTreeContainer .url-link a { max-width: calc(100% - 40px); } }
