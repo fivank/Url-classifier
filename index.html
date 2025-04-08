@@ -478,6 +478,8 @@
                 }
                 const iconSpan = document.createElement('i');
                 iconSpan.classList.add('fas', 'fa-folder', 'folder-icon');
+                // NEW: make folder icon clickable
+                iconSpan.style.cursor = 'pointer';
                 const labelSpan = document.createElement('span');
                 labelSpan.classList.add('label-text');
                 labelSpan.textContent = category;
@@ -573,7 +575,6 @@
                                  e.stopPropagation();
                                  deleteHistoryEntryById(entry.id);
                              });
-                             urlLi.appendChild(deleteBtn);
                              nestedUl.appendChild(urlLi);
                          });
                      li.appendChild(nestedUl);
@@ -595,6 +596,12 @@
 
                      labelSpan.style.cursor = 'pointer';
                      labelSpan.addEventListener('click', (e) => {
+                         e.stopPropagation();
+                         toggle();
+                     });
+
+                     // NEW: add click listener to folder icon
+                     iconSpan.addEventListener('click', (e) => {
                          e.stopPropagation();
                          toggle();
                      });
